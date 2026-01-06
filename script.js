@@ -43,12 +43,18 @@ const defaultData = {
     }
 };
 
+const DATA_VERSION = 'v2'; // Increment to force reset
+
 // --- Storage Manager ---
 const storage = {
     getTrips: () => {
         const stored = localStorage.getItem('travel_trips');
-        if (!stored) {
+        const version = localStorage.getItem('travel_version');
+
+        if (!stored || version !== DATA_VERSION) {
+            console.log('Resetting data to version:', DATA_VERSION);
             localStorage.setItem('travel_trips', JSON.stringify(defaultData));
+            localStorage.setItem('travel_version', DATA_VERSION);
             return defaultData;
         }
         return JSON.parse(stored);
