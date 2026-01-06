@@ -427,15 +427,20 @@ window.openEditor = function (id, type = 'trip') {
     // Hide/Show fields based on type
     const countryGroup = document.getElementById('form-group-country');
     const locationGroup = document.getElementById('form-group-location');
+    const dateGroup = document.getElementById('form-group-date');
 
     if (type === 'recipe') {
         countryGroup.classList.remove('hidden');
         locationGroup.classList.add('hidden');
+        dateGroup.classList.add('hidden');
         document.getElementById('edit-location').required = false;
+        document.getElementById('edit-date').required = false;
     } else {
         countryGroup.classList.add('hidden');
         locationGroup.classList.remove('hidden');
+        dateGroup.classList.remove('hidden');
         document.getElementById('edit-location').required = true;
+        document.getElementById('edit-date').required = true;
     }
 
     if (id && collection[id]) {
@@ -571,7 +576,7 @@ window.addEventListener('hashchange', () => {
 });
 
 window.addEventListener('DOMContentLoaded', () => {
-    console.log("Script v17 loaded - Save Logic Fixed + UI Refined");
+    console.log("Script v18 loaded - Recipe UI Refined");
     initData();
 });
 
