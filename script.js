@@ -37,6 +37,9 @@ const closeEditor = document.getElementById('close-editor');
 const tripForm = document.getElementById('trip-form');
 const editorBlocks = document.getElementById('editor-blocks');
 const deleteTripBtn = document.getElementById('delete-trip-btn');
+const saveBtn = document.getElementById('save-trip-btn');
+const filePicker = document.getElementById('file-picker');
+const browseCoverBtn = document.getElementById('browse-cover-btn');
 
 const TIMESTAMP = Date.now();
 
@@ -393,9 +396,7 @@ function renderTrip(item, type = 'trip') {
 let currentEditType = 'trip';
 let currentInputTarget = null; // To track which input should receive the image path
 
-const filePicker = document.getElementById('file-picker');
-const browseCoverBtn = document.getElementById('browse-cover-btn');
-const saveBtn = document.querySelector('.save-btn');
+// DOM references for editor already declared at the top
 
 // File Upload Handler
 filePicker.onchange = (e) => {
@@ -418,28 +419,41 @@ function triggerBrowse(inputElement) {
 window.openEditor = function (id, type = 'trip') {
     currentEditType = type;
     editorModal.classList.remove('hidden');
-    // Data is now in appData
     const collection = type === 'recipe' ? (appData.recipes || {}) : (appData.trips || {});
 
     document.getElementById('editor-title').innerText = id ? `Edit ${type === 'recipe' ? 'Recipe' : 'Trip'}` : `New ${type === 'recipe' ? 'Recipe' : 'Trip'}`;
     saveBtn.innerText = `Save ${type === 'recipe' ? 'Recipe' : 'Trip'}`;
 
+    // Hide/Show fields based on type
+    const countryGroup = document.getElementById('form-group-country');
+    const locationGroup = document.getElementById('form-group-location');
+
+    if (type === 'recipe') {
+        countryGroup.classList.remove('hidden');
+        locationGroup.classList.add('hidden');
+        document.getElementById('edit-location').required = false;
+    } else {
+        countryGroup.classList.add('hidden');
+        locationGroup.classList.remove('hidden');
+        document.getElementById('edit-location').required = true;
+    }
+
     if (id && collection[id]) {
-        // Edit Mode
         const item = collection[id];
         document.getElementById('edit-id').value = item.id;
         document.getElementById('edit-title').value = item.title;
         document.getElementById('edit-date').value = item.date;
-        document.getElementById('edit-location').value = item.location;
+        document.getElementById('edit-country').value = item.country || "";
+        document.getElementById('edit-location').value = item.location || "";
         document.getElementById('edit-cover').value = item.coverImage;
         deleteTripBtn.classList.remove('hidden');
         deleteTripBtn.innerText = `Delete ${type === 'recipe' ? 'Recipe' : 'Trip'}`;
         renderEditorBlocks(item.blocks);
     } else {
-        // Create Mode
         document.getElementById('edit-id').value = "";
         document.getElementById('edit-title').value = "";
         document.getElementById('edit-date').value = "";
+        document.getElementById('edit-country').value = "";
         document.getElementById('edit-location').value = "";
         document.getElementById('edit-cover').value = "";
         deleteTripBtn.classList.add('hidden');
@@ -510,22 +524,24 @@ tripForm.onsubmit = (e) => {
         id,
         title: document.getElementById('edit-title').value,
         date: document.getElementById('edit-date').value,
-        location: document.getElementById('edit-location').value,
         coverImage: document.getElementById('edit-cover').value,
         blocks
     };
 
-    const data = storage.getData();
+    if (currentEditType === 'recipe') newItem.country = document.getElementById('edit-country').value;
+    else newItem.location = document.getElementById('edit-location').value;
+
     if (currentEditType === 'recipe') {
-        data.recipes[id] = newItem;
+        if (!appData.recipes) appData.recipes = {};
+        appData.recipes[id] = newItem;
     } else {
-        data.trips[id] = newItem;
+        if (!appData.trips) appData.trips = {};
+        appData.trips[id] = newItem;
     }
 
-    storage.saveData(data);
+    saveData(appData);
     editorModal.classList.add('hidden');
 
-    // Redirect based on type
     if (currentEditType === 'recipe') window.location.hash = `#recipe/${id}`;
     else window.location.hash = `#trip/${id}`;
 
@@ -555,7 +571,7 @@ window.addEventListener('hashchange', () => {
 });
 
 window.addEventListener('DOMContentLoaded', () => {
-    console.log("Script v16 loaded - Guest-Safe Sync");
+    console.log("Script v17 loaded - Save Logic Fixed + UI Refined");
     initData();
 });
 
