@@ -88,19 +88,19 @@ function render() {
 
     // Sort trips by date descending (Newest first)
     const sortedTrips = Object.values(data.trips).sort((a, b) => {
-        // Simple string comparison for years (2025 vs 2024)
-        // For more complex dates, we might need new Date(a.date) - new Date(b.date)
         if (a.date < b.date) return 1;
         if (a.date > b.date) return -1;
         return 0;
     });
 
-    // Update Menu
+    // Update Menu (Public - No Edit Buttons)
     renderMenu(sortedTrips);
 
     mainNav.classList.remove('active');
 
-    if (hash === '#recipes') {
+    if (hash === '#admin') {
+        renderAdmin(data);
+    } else if (hash === '#recipes') {
         renderRecipeList(data.recipes);
     } else if (hash.startsWith('#trip/')) {
         const id = hash.split('/')[1];
@@ -113,6 +113,62 @@ function render() {
     } else {
         renderLanding(sortedTrips);
     }
+}
+
+function renderAdmin(data) {
+    const isAuthenticated = sessionStorage.getItem('admin_auth') === 'true';
+
+    if (!isAuthenticated) {
+        app.innerHTML = `
+            <section class="hero" style="background:var(--bg-color);">
+                <h1>Admin Access</h1>
+                <input type="password" id="admin-pass" placeholder="Enter PIN" style="padding:10px; font-size:1rem; border-radius:4px; border:1px solid #444; background:#222; color:#fff; margin-top:1rem;">
+                <button id="admin-login-btn" style="padding:10px 20px; background:var(--accent-color); border:none; border-radius:4px; font-weight:bold; cursor:pointer; margin-top:10px;">Login</button>
+            </section>
+        `;
+        document.getElementById('admin-login-btn').onclick = () => {
+            const pass = document.getElementById('admin-pass').value;
+            if (pass === '1234') { // Simple PIN
+                sessionStorage.setItem('admin_auth', 'true');
+                render(); // Re-render to show dashboard
+            } else {
+                alert('Wrong PIN');
+            }
+        };
+        return;
+    }
+
+    app.innerHTML = `
+        <section class="hero" style="height:auto; min-height:100vh; padding-top:100px; justify-content:flex-start;">
+            <h1>Dashboard</h1>
+            <div style="display:flex; gap:20px; margin-bottom:2rem;">
+                 <button onclick="openEditor(null, 'trip')" class="save-btn" style="width:auto; padding:10px 20px;">+ New Trip</button>
+                 <button onclick="openEditor(null, 'recipe')" class="save-btn" style="width:auto; padding:10px 20px;">+ New Recipe</button>
+            </div>
+            
+            <div style="width:100%; max-width:800px; text-align:left;">
+                <h2 style="border-bottom:1px solid var(--accent-color); margin-bottom:1rem;">Trips</h2>
+                <ul style="list-style:none; padding:0;">
+                    ${Object.values(data.trips).map(trip => `
+                        <li style="display:flex; justify-content:space-between; padding:10px; background:rgba(255,255,255,0.05); margin-bottom:5px; border-radius:4px;">
+                            <span>${trip.title}</span>
+                            <button onclick="window.location.hash='#trip/${trip.id}'; setTimeout(()=>openEditor('${trip.id}', 'trip'), 100)" style="cursor:pointer; color:var(--accent-color); background:none; border:none;">Edit</button>
+                        </li>
+                    `).join('')}
+                </ul>
+
+                <h2 style="border-bottom:1px solid var(--accent-color); margin:2rem 0 1rem;">Recipes</h2>
+                 <ul style="list-style:none; padding:0;">
+                    ${Object.values(data.recipes).map(recipe => `
+                        <li style="display:flex; justify-content:space-between; padding:10px; background:rgba(255,255,255,0.05); margin-bottom:5px; border-radius:4px;">
+                            <span>${recipe.title}</span>
+                            <button onclick="window.location.hash='#recipe/${recipe.id}'; setTimeout(()=>openEditor('${recipe.id}', 'recipe'), 100)" style="cursor:pointer; color:var(--accent-color); background:none; border:none;">Edit</button>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        </section>
+    `;
 }
 
 function renderRecipeList(recipes) {
@@ -139,7 +195,6 @@ function renderRecipeList(recipes) {
                     </div>
                 `).join('')}
             </div>
-             <button onclick="openEditor(null, 'recipe')" style="margin-top:2rem; padding:15px 30px; background:var(--accent-color); border:none; border-radius:4px; font-weight:bold; cursor:pointer; font-size:1.1rem; box-shadow: 0 4px 15px rgba(212,175,55,0.3);">+ Add Recipe</button>
         </section>
     `;
     document.title = "Recipes | Travel Log";
@@ -165,8 +220,6 @@ function renderMenu(sortedTripArray) {
             </li>
 
             <li><a href="#recipes" class="nav-link">Recipes</a></li>
-
-            <li><button id="new-trip-btn" class="nav-link" style="background:none; border:none; cursor:pointer; font-size:1.5rem; margin-top:2rem; color:#aaa;">+ New Trip</button></li>
         </ul>
     `;
 
@@ -184,12 +237,6 @@ function renderMenu(sortedTripArray) {
             submenu.style.maxHeight = '0px';
             arrow.style.transform = 'rotate(0deg)';
         }
-    };
-
-    // Re-bind new trip button
-    document.getElementById('new-trip-btn').onclick = () => {
-        mainNav.classList.remove('active');
-        openEditor(null, 'trip');
     };
 }
 
