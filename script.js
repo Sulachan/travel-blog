@@ -100,19 +100,18 @@ async function initData() {
             const localData = localStorage.getItem('travel_data');
             if (localData) {
                 appData = JSON.parse(localData);
-                await setDoc(docRef, appData);
             } else {
                 appData = { trips: defaultData, recipes: defaultRecipes };
-                await setDoc(docRef, appData);
             }
+
+            // Try to seed the cloud silently (will ignore if permissions block it)
+            setDoc(docRef, appData).catch(e => console.log("Cloud seeding skipped (guest mode or rules active)"));
         }
     } catch (e) {
-        console.error("Cloud Error:", e);
-        // Bring back the warning if they want sync
         if (e.code === 'permission-denied') {
-            alert("Database Error: Access Denied. Please check your Firestore Rules (match /{document=**} { allow read, write: if true; }).");
+            console.warn("Firestore Access Restricted (Guest Mode Active)");
         } else {
-            alert(`Database Sync Issue (${e.code}): ${e.message}`);
+            console.error("Cloud Connection Error:", e);
         }
 
         const local = localStorage.getItem('travel_data');
@@ -556,7 +555,7 @@ window.addEventListener('hashchange', () => {
 });
 
 window.addEventListener('DOMContentLoaded', () => {
-    console.log("Script v15 loaded - Enforcing Sync (Fixed)");
+    console.log("Script v16 loaded - Guest-Safe Sync");
     initData();
 });
 
