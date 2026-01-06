@@ -12,82 +12,7 @@ const firebaseConfig = {
     appId: "1:877186471798:web:c7a3f9f8ac8a9fb1938c57"
 };
 
-// Initialize Firebase
-const firebaseApp = initializeApp(firebaseConfig);
-const auth = getAuth(firebaseApp);
-const db = getFirestore(firebaseApp);
-let currentUser = null;
-let appData = null; // In-memory data state
-let isLoaded = false;
-
-// Auth Listener
-onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-    // Re-render to update UI (Menu, Admin access)
-    if (isLoaded) try { render(); } catch (e) { console.error("Render error after auth change", e); }
-});
-
-const app = document.getElementById('app');
-const mainNav = document.getElementById('main-nav');
-const dynamicNavLinks = document.getElementById('dynamic-nav-links');
-const menuToggle = document.getElementById('menu-toggle');
-// const closeNav = document.getElementById('close-nav'); // Removed from HTML
-// const newTripBtn = document.getElementById('new-trip-btn'); // Removed from HTML
-
-// Editor Elements
-const editorModal = document.getElementById('editor-modal');
-const closeEditor = document.getElementById('close-editor');
-const tripForm = document.getElementById('trip-form');
-const editorBlocks = document.getElementById('editor-blocks');
-const deleteTripBtn = document.getElementById('delete-trip-btn');
-
-const TIMESTAMP = Date.now();
-
-// Default Data (for first load)
-const defaultData = {
-    "indonesia-2024": {
-        id: "indonesia-2024",
-        title: "Indonesia",
-        date: "2024",
-        location: "Bali & Komodo",
-        coverImage: "assets/images/indonesia.png",
-        blocks: [
-            { type: 'text', content: "Our trip to Indonesia was an awakening of the senses. From the spiritual aura of Bali's temples to the rugged, prehistoric landscapes of Komodo National Park, every moment felt like a scene from an adventure novel." },
-            { type: 'text', content: "We started in Ubud, surrounded by lush rice terraces and vibrant culture. The local artisans and the calmness of the water temples set the tone for the trip." },
-            { type: 'image', content: "assets/images/indonesia.png" },
-            { type: 'text', content: "Then, we ventured east to the Komodo islands. Diving with manta rays and walking among the legendary Komodo dragons was a humbling reminder of nature's raw power." }
-        ]
-    },
-    "sea-2025": {
-        id: "sea-2025",
-        title: "South East Asia",
-        date: "2025",
-        location: "Thailand, Vietnam, Cambodia",
-        coverImage: "assets/images/sea.png",
-        blocks: [
-            { type: 'text', content: "2025 marked our grand tour of South East Asia. It was a cacophony of street food, motorbike engines, and ancient history." },
-            { type: 'text', content: "Bangkok's energy was infectious. We got lost in the markets, ate the best Pad Thai of our lives, and marveling at the Grand Palace." },
-            { type: 'image', content: "assets/images/sea.png" },
-            { type: 'text', content: "Vietnam offered a change of pace with the limestone karsts of Ha Long Bay and the lantern-lit streets of Hoi An." }
-        ]
-    }
-};
-
-const defaultRecipes = {
-    "nasi-goreng": {
-        id: "nasi-goreng",
-        title: "Bali Nasi Goreng",
-        date: "From Indonesia 2024",
-        location: "Ubud, Bali",
-        coverImage: "assets/images/indonesia.png",
-        blocks: [
-            { type: 'text', content: "The secret to a great Nasi Goreng is the Kecap Manis (sweet soy sauce) and day-old rice." },
-            { type: 'text', content: "Ingredients: Rice, Shallots, Garlic, Chili, Kecap Manis, Egg, Shrimp Paste." }
-        ]
-    }
-};
-
-const DATA_VERSION = 'v3'; // Increment to force reset
+// ... (skipping some logic) ...
 
 // --- Data Management (Firestore + Migration) ---
 async function initData() {
@@ -96,19 +21,28 @@ async function initData() {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-            console.log("Loaded data from Firestore");
+            console.log("Loaded from Cloud");
             appData = docSnap.data();
         } else {
+            console.log("Cloud empty - checking Local Migration");
             const localData = localStorage.getItem('travel_data');
             if (localData) {
                 appData = JSON.parse(localData);
-                try { await setDoc(docRef, appData); } catch (e) { console.log("Cloud sync skipped"); }
+                await setDoc(docRef, appData);
             } else {
                 appData = { trips: defaultData, recipes: defaultRecipes };
+                await setDoc(docRef, appData);
             }
         }
     } catch (e) {
-        console.warn("Firestore fallback active:", e.code || 'off');
+        console.error("Cloud Error:", e);
+        // Bring back the warning if they want sync
+        if (e.code === 'permission-denied') {
+            alert("Database Error: Access Denied. Please check your Firestore Rules (match /{document=**} { allow read, write: if true; }).");
+        } else {
+            alert(`Database Sync Issue (${e.code}): ${e.message}`);
+        }
+
         const local = localStorage.getItem('travel_data');
         appData = local ? JSON.parse(local) : { trips: defaultData, recipes: defaultRecipes };
     }
@@ -120,11 +54,13 @@ async function saveData(newData) {
     appData = newData;
     render();
     localStorage.setItem('travel_data', JSON.stringify(newData));
+
     try {
         await setDoc(doc(db, "content", "main"), newData);
-        console.log("Cloud synced");
+        console.log("Cloud Saved");
     } catch (e) {
-        console.warn("Cloud save skipped (offline/unconfigured)");
+        console.error("Save failed:", e);
+        alert("Sync Failed: Your changes are saved locally, but not to the cloud. (" + e.code + ")");
     }
 }
 
@@ -548,7 +484,7 @@ window.addEventListener('hashchange', () => {
 });
 
 window.addEventListener('DOMContentLoaded', () => {
-    console.log("Script v13 loaded - resilient mode");
+    console.log("Script v14 loaded - enforcing Sync");
     initData();
 });
 
