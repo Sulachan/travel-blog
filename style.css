@@ -360,6 +360,7 @@ textarea:focus {
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--accent-color);
+    position: static !important;
 }
 
 .trip-background {
