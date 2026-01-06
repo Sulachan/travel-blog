@@ -22,11 +22,11 @@ const defaultData = {
         title: "Indonesia",
         date: "2024",
         location: "Bali & Komodo",
-        coverImage: `./assets/images/indonesia.png?t=${TIMESTAMP}`,
+        coverImage: "assets/images/indonesia.png",
         blocks: [
             { type: 'text', content: "Our trip to Indonesia was an awakening of the senses. From the spiritual aura of Bali's temples to the rugged, prehistoric landscapes of Komodo National Park, every moment felt like a scene from an adventure novel." },
             { type: 'text', content: "We started in Ubud, surrounded by lush rice terraces and vibrant culture. The local artisans and the calmness of the water temples set the tone for the trip." },
-            { type: 'image', content: `./assets/images/indonesia.png?t=${TIMESTAMP}` },
+            { type: 'image', content: "assets/images/indonesia.png" },
             { type: 'text', content: "Then, we ventured east to the Komodo islands. Diving with manta rays and walking among the legendary Komodo dragons was a humbling reminder of nature's raw power." }
         ]
     },
@@ -35,11 +35,11 @@ const defaultData = {
         title: "South East Asia",
         date: "2025",
         location: "Thailand, Vietnam, Cambodia",
-        coverImage: `./assets/images/sea.png?t=${TIMESTAMP}`,
+        coverImage: "assets/images/sea.png",
         blocks: [
             { type: 'text', content: "2025 marked our grand tour of South East Asia. It was a cacophony of street food, motorbike engines, and ancient history." },
             { type: 'text', content: "Bangkok's energy was infectious. We got lost in the markets, ate the best Pad Thai of our lives, and marveling at the Grand Palace." },
-            { type: 'image', content: `./assets/images/sea.png?t=${TIMESTAMP}` },
+            { type: 'image', content: "assets/images/sea.png" },
             { type: 'text', content: "Vietnam offered a change of pace with the limestone karsts of Ha Long Bay and the lantern-lit streets of Hoi An." }
         ]
     }
@@ -116,7 +116,7 @@ function renderLanding(trips) {
             <div class="hero-menu">
                 ${Object.values(trips).map(trip => `
                     <div class="trip-card" onclick="window.location.hash='#trip/${trip.id}'">
-                        <img src="${trip.coverImage}" alt="${trip.title}" loading="lazy" onerror="this.style.border='2px solid red';">
+                        <img src="${trip.coverImage}" alt="${trip.title}" loading="lazy">
                         <div class="content">
                             <span>${trip.date}</span>
                             <h3>${trip.title}</h3>
@@ -136,7 +136,7 @@ function renderTrip(trip) {
             <button class="edit-trip-btn" onclick="openEditor('${trip.id}')" style="position:fixed; bottom:20px; right:20px; z-index:100; padding:10px 20px; background:var(--accent-color); border:none; border-radius:4px; font-weight:bold; cursor:pointer;">Edit Trip</button>
             <header>
                 <div class="trip-background">
-                    <img src="${trip.coverImage}" alt="${trip.title}" onerror="this.parentElement.style.background='red'; alert('Failed to load image: ' + this.src);">
+                    <img src="${trip.coverImage}" alt="${trip.title}">
                 </div>
                 <div class="header-content">
                     <div class="date-location">${trip.date} : ${trip.location}</div>
@@ -148,7 +148,7 @@ function renderTrip(trip) {
                 <div class="trip-blocks">
                     ${trip.blocks.map(block => {
         if (block.type === 'text') return `<p>${block.content}</p>`;
-        if (block.type === 'image') return `<div class="trip-image-block"><img src="${block.content}" alt="Trip Image" onerror="this.style.border='5px solid red';"></div>`;
+        if (block.type === 'image') return `<div class="trip-image-block"><img src="${block.content}" alt="Trip Image"></div>`;
         return '';
     }).join('')}
                 </div>
