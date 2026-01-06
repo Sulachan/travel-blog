@@ -96,55 +96,35 @@ async function initData() {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-            // 1. Remote Data Exists - Use it
             console.log("Loaded data from Firestore");
             appData = docSnap.data();
         } else {
-            // 2. Remote Empty - Check Local Storage for Migration
-            console.log("No remote data. Checking local...");
             const localData = localStorage.getItem('travel_data');
-
             if (localData) {
-                // Migrate Local -> Cloud
-                console.log("Migrating local data to cloud...");
                 appData = JSON.parse(localData);
+                try { await setDoc(docRef, appData); } catch (e) { console.log("Cloud sync skipped"); }
             } else {
-                // Full Default Start
-                console.log("No local data. Using defaults.");
                 appData = { trips: defaultData, recipes: defaultRecipes };
             }
-
-            // Save initial state to Firestore
-            await setDoc(docRef, appData);
         }
-
-        isLoaded = true;
-        render();
-
     } catch (e) {
-        console.error("Data Load Error:", e);
-        // Specialized Error Reporting
-        alert(`Database Error (${e.code || 'unknown'}): ${e.message}\n\nCheck console for details.`);
-
+        console.warn("Firestore fallback active:", e.code || 'off');
         const local = localStorage.getItem('travel_data');
         appData = local ? JSON.parse(local) : { trips: defaultData, recipes: defaultRecipes };
-        isLoaded = true;
-        render();
     }
+    isLoaded = true;
+    render();
 }
 
 async function saveData(newData) {
-    appData = newData; // Optimistic update
-    render(); // Update UI immediately
-
+    appData = newData;
+    render();
+    localStorage.setItem('travel_data', JSON.stringify(newData));
     try {
         await setDoc(doc(db, "content", "main"), newData);
-        console.log("Data synced to cloud");
-        // Also update local for fallback
-        localStorage.setItem('travel_data', JSON.stringify(newData));
+        console.log("Cloud synced");
     } catch (e) {
-        console.error("Save Error:", e);
-        alert("Error saving to cloud: " + e.message);
+        console.warn("Cloud save skipped (offline/unconfigured)");
     }
 }
 
@@ -568,7 +548,7 @@ window.addEventListener('hashchange', () => {
 });
 
 window.addEventListener('DOMContentLoaded', () => {
-    console.log("Script v11 loaded - initializing DB");
+    console.log("Script v13 loaded - resilient mode");
     initData();
 });
 
