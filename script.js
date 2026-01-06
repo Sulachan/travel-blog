@@ -124,13 +124,16 @@ function renderLanding(trips) {
 function renderTrip(trip) {
     app.innerHTML = `
         <article class="trip-detail">
+            <a href="#home" class="back-home-btn" aria-label="Back to Home">←</a>
             <button class="edit-trip-btn" onclick="openEditor('${trip.id}')" style="position:fixed; bottom:20px; right:20px; z-index:100; padding:10px 20px; background:var(--accent-color); border:none; border-radius:4px; font-weight:bold; cursor:pointer;">Edit Trip</button>
             <header>
                 <div class="trip-background">
                     <img src="${trip.coverImage}" alt="${trip.title}">
                 </div>
-                <div class="date-location">${trip.date} : ${trip.location}</div>
-                <h1>${trip.title}</h1>
+                <div class="header-content">
+                    <div class="date-location">${trip.date} : ${trip.location}</div>
+                    <h1>${trip.title}</h1>
+                </div>
             </header>
             
             <section class="trip-content">

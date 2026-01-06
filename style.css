@@ -186,6 +186,35 @@ textarea:focus {
 }
 
 /* Trip Content Styles */
+.back-home-btn {
+    position: fixed;
+    top: 2rem;
+    left: 2rem;
+    z-index: 100;
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 1.5rem;
+    line-height: 1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.3);
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.back-home-btn:hover {
+    background: rgba(212, 175, 55, 0.2);
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+    transform: scale(1.1);
+}
+
 .trip-image-block {
     margin: var(--gap-md) 0;
 }
@@ -312,22 +341,25 @@ textarea:focus {
     padding: var(--gap-lg);
 }
 
-.trip-detail header h1 {
-    font-size: clamp(2.5rem, 6vw, 5rem);
+.header-content {
     z-index: 2;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.trip-detail header h1 {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    line-height: 1;
 }
 
 .trip-detail header .date-location {
-    position: absolute;
-    top: var(--gap-md);
-    left: var(--gap-md);
     font-family: var(--font-body);
-    font-size: 0.9rem;
+    font-size: 1rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--accent-color);
-    z-index: 2;
 }
 
 .trip-background {
@@ -343,7 +375,7 @@ textarea:focus {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba(10, 10, 10, 0.3), var(--bg-color));
+    background: linear-gradient(to bottom, rgba(10, 10, 10, 0.2), var(--bg-color));
 }
 
 .trip-background img {
