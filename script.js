@@ -108,10 +108,10 @@ function render() {
 
 function renderRecipeList(recipes) {
     app.innerHTML = `
-        <section class="hero" style="height:50vh; min-height:400px;">
+        <section class="hero" style="height:auto; min-height:100vh; padding-top:100px; padding-bottom:100px; justify-content:flex-start; overflow:visible;">
             <h1>Culinary Journey</h1>
-            <p>Flavors we brought back home.</p>
-            <div class="hero-menu">
+            <p style="margin-bottom: 2rem;">Flavors we brought back home.</p>
+            <div class="hero-menu" style="opacity:1; animation:none;">
                 ${Object.values(recipes).map(recipe => `
                     <div class="trip-card" onclick="window.location.hash='#recipe/${recipe.id}'">
                         <img src="${recipe.coverImage}" alt="${recipe.title}" loading="lazy">
@@ -122,7 +122,7 @@ function renderRecipeList(recipes) {
                     </div>
                 `).join('')}
             </div>
-             <button onclick="openEditor(null, 'recipe')" style="margin-top:2rem; padding:10px 20px; background:var(--accent-color); border:none; border-radius:4px; font-weight:bold; cursor:pointer;">+ Add Recipe</button>
+             <button onclick="openEditor(null, 'recipe')" style="margin-top:2rem; padding:15px 30px; background:var(--accent-color); border:none; border-radius:4px; font-weight:bold; cursor:pointer; font-size:1.1rem; box-shadow: 0 4px 15px rgba(212,175,55,0.3);">+ Add Recipe</button>
         </section>
     `;
     document.title = "Recipes | Travel Log";
