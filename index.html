@@ -1,13 +1,83 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Travel Blog</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Log | anton</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Content will be injected here by script.js -->
+    </div>
+
+    <!-- Navigation Overlay -->
+    <nav id="main-nav" class="hidden">
+        <button id="close-nav" aria-label="Close navigation">&times;</button>
+        <ul>
+            <li><a href="#home" class="nav-link" data-route="home">Home</a></li>
+            <li><button id="new-trip-btn" class="nav-link" style="background:none; border:none; cursor:pointer;">+ New
+                    Trip</button></li>
+        </ul>
+        <div id="dynamic-nav-links"></div>
+    </nav>
+
+    <button id="menu-toggle" aria-label="Open menu">
+        <span class="line"></span>
+        <span class="line"></span>
+    </button>
+
+    <!-- Editor Modal -->
+    <div id="editor-modal" class="hidden">
+        <div class="editor-content">
+            <button id="close-editor">&times;</button>
+            <h2 id="editor-title">Edit Trip</h2>
+            <form id="trip-form">
+                <input type="hidden" id="edit-id">
+
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="edit-title" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="text" id="edit-date" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="edit-location" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Cover Image URL (or path)</label>
+                    <input type="text" id="edit-cover" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Content Blocks</label>
+                    <div id="editor-blocks"></div>
+                    <div class="block-controls">
+                        <button type="button" id="add-text-block">+ Text</button>
+                        <button type="button" id="add-image-block">+ Image</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="save-btn">Save Trip</button>
+                <button type="button" id="delete-trip-btn" class="delete-btn hidden">Delete Trip</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js" type="module"></script>
+</body>
+
 </html>
