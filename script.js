@@ -116,24 +116,27 @@ function render() {
 }
 
 function renderAdmin(data) {
-    const isAuthenticated = sessionStorage.getItem('admin_auth') === 'true';
-
-    if (!isAuthenticated) {
+    if (!currentUser) {
         app.innerHTML = `
             <section class="hero" style="background:var(--bg-color);">
                 <h1>Admin Access</h1>
-                <input type="password" id="admin-pass" placeholder="Enter PIN" style="padding:10px; font-size:1rem; border-radius:4px; border:1px solid #444; background:#222; color:#fff; margin-top:1rem;">
-                <button id="admin-login-btn" style="padding:10px 20px; background:var(--accent-color); border:none; border-radius:4px; font-weight:bold; cursor:pointer; margin-top:10px;">Login</button>
+                <p>Please log in to manage your content.</p>
+                <button id="admin-login-btn" style="padding:15px 30px; background:#fff; color:#333; border:none; border-radius:4px; font-weight:bold; cursor:pointer; margin-top:20px; display:inline-flex; align-items:center; gap:10px;">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+                    Sign in with Google
+                </button>
             </section>
         `;
         document.getElementById('admin-login-btn').onclick = () => {
-            const pass = document.getElementById('admin-pass').value;
-            if (pass === '1234') { // Simple PIN
-                sessionStorage.setItem('admin_auth', 'true');
-                render(); // Re-render to show dashboard
-            } else {
-                alert('Wrong PIN');
-            }
+            const provider = new GoogleAuthProvider();
+            signInWithPopup(auth, provider)
+                .then(() => {
+                    // onAuthStateChanged will trigger render
+                })
+                .catch((error) => {
+                    console.error("Login failed", error);
+                    alert("Login failed: " + error.message);
+                });
         };
         return;
     }
@@ -141,10 +144,14 @@ function renderAdmin(data) {
     app.innerHTML = `
         <section class="hero" style="height:auto; min-height:100vh; padding-top:100px; justify-content:flex-start;">
             <div style="display:flex; justify-content:space-between; width:100%; max-width:800px; align-items:center;">
-                <h1>Dashboard</h1>
-                <button onclick="sessionStorage.removeItem('admin_auth'); render();" style="background:none; border:1px solid #666; color:#aaa; padding:5px 10px; cursor:pointer; border-radius:4px;">Logout</button>
+                <h1 style="font-size:2rem;">Dashboard</h1>
+                <div style="text-align:right;">
+                    <small style="display:block; color:#888; margin-bottom:5px;">${currentUser.email}</small>
+                    <button id="logout-btn" style="background:none; border:1px solid #666; color:#aaa; padding:5px 10px; cursor:pointer; border-radius:4px;">Logout</button>
+                </div>
             </div>
-            <div style="display:flex; gap:20px; margin-bottom:2rem;">
+            
+            <div style="display:flex; gap:20px; margin-bottom:2rem; margin-top:2rem;">
                  <button onclick="openEditor(null, 'trip')" class="save-btn" style="width:auto; padding:10px 20px;">+ New Trip</button>
                  <button onclick="openEditor(null, 'recipe')" class="save-btn" style="width:auto; padding:10px 20px;">+ New Recipe</button>
             </div>
@@ -172,6 +179,12 @@ function renderAdmin(data) {
             </div>
         </section>
     `;
+
+    document.getElementById('logout-btn').onclick = () => {
+        signOut(auth).then(() => {
+            // onAuthStateChanged will trigger render
+        });
+    };
 }
 
 function renderRecipeList(recipes) {
