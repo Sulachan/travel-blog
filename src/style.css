@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Caveat:wght@400..700&display=swap');
+
+:root {
+  --color-parchment: #F0E6D2;
+  --color-ink: #2C2C2C;
+  --color-faded-red: #8B0000;
+  --color-ocean: #A4B8C4;
+  --font-heading: 'IM Fell English', serif;
+  --font-hand: 'Caveat', cursive;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-heading);
+  background-color: var(--color-parchment);
+  background-image: url('./assets/parchment.png');
+  background-repeat: repeat;
+  background-size: 500px;
+  color: var(--color-ink);
+  min-height: 100vh;
+}
+
+#app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  position: relative;
+}
+
+h1 {
+  text-align: center;
+  font-size: 3.5rem;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 2px solid var(--color-ink);
+  padding-bottom: 1rem;
+}
+
+/* Trip Section */
+.trip-section {
+  margin-bottom: 4rem;
+}
+
+.trip-title {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trip-title::before {
+  content: '⚓';
+  font-size: 1.5rem;
+}
+
+/* Day Entries */
+.day-entry {
+  border-left: 3px solid var(--color-ink);
+  margin-left: 10px;
+  padding-left: 20px;
+  margin-bottom: 1rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.day-header {
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  gap: 15px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid transparent;
+  width: fit-content;
+  border-radius: 4px;
+}
+
+.day-header:hover {
+  border-color: var(--color-ink);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.day-date {
+  font-family: var(--font-hand);
+  font-size: 1.5rem;
+  color: var(--color-faded-red);
+  font-weight: bold;
+}
+
+.day-title {
+  font-size: 1.3rem;
+  font-style: italic;
+}
+
+/* Unrolling Effect */
+.day-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.8s ease-in-out, opacity 0.5s ease;
+  opacity: 0;
+  margin-top: 0;
+  padding-right: 20px;
+}
+
+.day-entry.open .day-content {
+  max-height: 1000px; /* Arbitrary large height */
+  opacity: 1;
+  margin-top: 15px;
+}
+
+.day-text {
+  font-family: var(--font-hand);
+  font-size: 1.4rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.day-images {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.day-img {
+  height: 200px;
+  border: 5px solid white;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  transform: rotate(-2deg);
+  transition: transform 0.3s;
+}
+
+.day-img:nth-child(even) {
+  transform: rotate(2deg);
+}
+
+.day-img:hover {
+  transform: scale(1.05) rotate(0deg);
+  z-index: 10;
+}

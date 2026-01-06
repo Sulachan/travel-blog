@@ -1,0 +1,32 @@
+[
+    {
+        "id": "trip-1",
+        "title": "European Summer",
+        "days": [
+            {
+                "date": "01/06",
+                "title": "Paris --> New York",
+                "content": "The journey begins! After a lovely breakfast in Montmartre, we headed to CDG. The flight was long but smooth. Arrived in NYC just in time for a slice of pizza.",
+                "images": []
+            },
+            {
+                "date": "02/06",
+                "title": "Exploring Brooklyn",
+                "content": "Walked across the Brooklyn Bridge. The view of the skyline is breathtaking. Found a nice coffee shop in Dumbo.",
+                "images": []
+            }
+        ]
+    },
+    {
+        "id": "trip-2",
+        "title": "Japan Adventure",
+        "days": [
+            {
+                "date": "10/04",
+                "title": "Tokyo Arrival",
+                "content": "Landed in Narita. Taken the express train to Shinjuku. The neon lights are overwhelming in the best way possible.",
+                "images": []
+            }
+        ]
+    }
+]
