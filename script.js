@@ -86,8 +86,17 @@ function render() {
     const hash = window.location.hash;
     const data = storage.getData();
 
+    // Sort trips by date descending (Newest first)
+    const sortedTrips = Object.values(data.trips).sort((a, b) => {
+        // Simple string comparison for years (2025 vs 2024)
+        // For more complex dates, we might need new Date(a.date) - new Date(b.date)
+        if (a.date < b.date) return 1;
+        if (a.date > b.date) return -1;
+        return 0;
+    });
+
     // Update Menu
-    renderMenu(data.trips);
+    renderMenu(sortedTrips);
 
     mainNav.classList.remove('active');
 
@@ -96,24 +105,31 @@ function render() {
     } else if (hash.startsWith('#trip/')) {
         const id = hash.split('/')[1];
         if (data.trips[id]) renderTrip(data.trips[id], 'trip');
-        else renderLanding(data.trips);
+        else renderLanding(sortedTrips);
     } else if (hash.startsWith('#recipe/')) {
         const id = hash.split('/')[1];
         if (data.recipes[id]) renderTrip(data.recipes[id], 'recipe');
         else renderRecipeList(data.recipes);
     } else {
-        renderLanding(data.trips);
+        renderLanding(sortedTrips);
     }
 }
 
 function renderRecipeList(recipes) {
+    // Sort recipes by date descending too for consistency
+    const sortedRecipes = Object.values(recipes).sort((a, b) => {
+        if (a.date < b.date) return 1;
+        if (a.date > b.date) return -1;
+        return 0;
+    });
+
     app.innerHTML = `
         <a href="#home" class="back-home-btn" aria-label="Back to Home">←</a>
         <section class="hero" style="height:auto; min-height:100vh; padding-top:100px; padding-bottom:100px; justify-content:flex-start; overflow:visible;">
             <h1>Culinary Journey</h1>
             <p style="margin-bottom: 2rem;">Flavors we brought back home.</p>
             <div class="hero-menu" style="opacity:1; animation:none;">
-                ${Object.values(recipes).map(recipe => `
+                ${sortedRecipes.map(recipe => `
                     <div class="trip-card" onclick="window.location.hash='#recipe/${recipe.id}'">
                         <img src="${recipe.coverImage}" alt="${recipe.title}" loading="lazy">
                         <div class="content">
@@ -129,24 +145,32 @@ function renderRecipeList(recipes) {
     document.title = "Recipes | Travel Log";
 }
 
-function renderMenu(trips) {
+function renderMenu(sortedTripArray) {
     dynamicNavLinks.innerHTML = `
         <ul style="list-style:none; text-align:center;">
-             ${Object.values(trips).map(trip => `
+            <li><a href="#home" class="nav-link" data-route="home">Home</a></li>
+            <li><a href="#recipes" class="nav-link">Recipes</a></li>
+             ${sortedTripArray.map(trip => `
                 <li><a href="#trip/${trip.id}" class="nav-link">${trip.title} ${trip.date}</a></li>
              `).join('')}
+             <li><button id="new-trip-btn" class="nav-link" style="background:none; border:none; cursor:pointer;">+ New Trip</button></li>
         </ul>
     `;
+    // Re-bind new trip button since we overwrote the innerHTML
+    document.getElementById('new-trip-btn').onclick = () => {
+        mainNav.classList.remove('active');
+        openEditor(null, 'trip');
+    };
 }
 
-function renderLanding(trips) {
+function renderLanding(sortedTripArray) {
     app.innerHTML = `
         <section class="hero">
             <h1>Wanderlust Chronicles</h1>
             <p>Documenting our journey through the world's most beautiful landscapes.</p>
             
             <div class="hero-menu">
-                ${Object.values(trips).map(trip => `
+                ${sortedTripArray.map(trip => `
                     <div class="trip-card" onclick="window.location.hash='#trip/${trip.id}'">
                         <img src="${trip.coverImage}" alt="${trip.title}" loading="lazy">
                         <div class="content">
