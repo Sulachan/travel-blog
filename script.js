@@ -514,7 +514,8 @@ window.addEventListener('hashchange', () => {
 });
 
 window.addEventListener('DOMContentLoaded', () => {
-    try { render(); } catch (e) { alert("Load Error: " + e.message); console.error(e); }
+    console.log("Script v7 loaded");
+    try { render(); } catch (e) { alert("Load Error (v7): " + e.message); console.error(e); }
 });
 
 // Toggle Menu Button (Unified)
