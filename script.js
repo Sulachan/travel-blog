@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 
 // --- Firebase Configuration ---
 const firebaseConfig = {
@@ -145,15 +145,19 @@ function renderAdmin(data) {
             <section class="hero" style="background:var(--bg-color);">
                 <h1>Admin Access</h1>
                 <p>Please log in to manage your content.</p>
-                <button id="admin-login-btn" style="padding:15px 30px; background:#fff; color:#333; border:none; border-radius:4px; font-weight:bold; cursor:pointer; margin-top:20px; display:inline-flex; align-items:center; gap:10px;">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
-                    Sign in with Google
-                </button>
+                <form id="login-form" style="display:flex; flex-direction:column; gap:15px; max-width:300px; margin:20px auto; width:100%;">
+                    <input type="email" id="login-email" placeholder="Email" required style="padding:10px; border-radius:4px; border:1px solid #333; background:#000; color:#fff;">
+                    <input type="password" id="login-password" placeholder="Password" required style="padding:10px; border-radius:4px; border:1px solid #333; background:#000; color:#fff;">
+                    <button type="submit" style="padding:12px; background:var(--accent-color); color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">Login</button>
+                </form>
             </section>
         `;
-        document.getElementById('admin-login-btn').onclick = () => {
-            const provider = new GoogleAuthProvider();
-            signInWithPopup(auth, provider)
+        document.getElementById('login-form').onsubmit = (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            signInWithEmailAndPassword(auth, email, password)
                 .then(() => {
                     // onAuthStateChanged will trigger render
                 })
@@ -275,7 +279,7 @@ function renderMenu(sortedTripArray) {
             
             ${currentUser
             ? '<li><a href="#admin" class="nav-link" style="color:var(--accent-color);">Manage</a></li>'
-            : '<li><a href="#admin" class="nav-link" style="font-size:1.2rem; color:#666;">Login</a></li>'}
+            : '<li><a href="#admin" class="nav-link" style="font-size:1.5rem; color:#fff; border:1px solid #333; padding:5px 15px; border-radius:4px; display:inline-block; margin-top:10px;">Login</a></li>'}
         </ul>
     `;
 
@@ -515,8 +519,8 @@ window.addEventListener('hashchange', () => {
 });
 
 window.addEventListener('DOMContentLoaded', () => {
-    console.log("Script v7 loaded");
-    try { render(); } catch (e) { alert("Load Error (v7): " + e.message); console.error(e); }
+    console.log("Script v8 loaded");
+    try { render(); } catch (e) { alert("Load Error (v8): " + e.message); console.error(e); }
 });
 
 // Toggle Menu Button (Unified)
