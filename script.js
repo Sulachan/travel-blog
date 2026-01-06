@@ -402,10 +402,7 @@ deleteTripBtn.onclick = () => {
     }
 };
 
-newTripBtn.onclick = () => {
-    mainNav.classList.remove('active');
-    openEditor(null, 'trip');
-};
+// Removed global newTripBtn listener as it is now dynamic inside renderMenu
 
 closeEditor.onclick = () => editorModal.classList.add('hidden');
 
