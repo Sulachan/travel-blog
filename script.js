@@ -149,7 +149,6 @@ function renderMenu(sortedTripArray) {
     dynamicNavLinks.innerHTML = `
         <ul style="list-style:none; text-align:center; padding:0;">
             <li><a href="#home" class="nav-link" data-route="home">Home</a></li>
-            <li><a href="#recipes" class="nav-link">Recipes</a></li>
             
             <!-- Trips Toggle -->
             <li>
@@ -164,6 +163,8 @@ function renderMenu(sortedTripArray) {
                     </ul>
                 </div>
             </li>
+
+            <li><a href="#recipes" class="nav-link">Recipes</a></li>
 
             <li><button id="new-trip-btn" class="nav-link" style="background:none; border:none; cursor:pointer; font-size:1.5rem; margin-top:2rem; color:#aaa;">+ New Trip</button></li>
         </ul>
