@@ -45,56 +45,87 @@ const defaultData = {
     }
 };
 
-const DATA_VERSION = 'v2'; // Increment to force reset
+const defaultRecipes = {
+    "nasi-goreng": {
+        id: "nasi-goreng",
+        title: "Bali Nasi Goreng",
+        date: "From Indonesia 2024",
+        location: "Ubud, Bali",
+        coverImage: "assets/images/indonesia.png",
+        blocks: [
+            { type: 'text', content: "The secret to a great Nasi Goreng is the Kecap Manis (sweet soy sauce) and day-old rice." },
+            { type: 'text', content: "Ingredients: Rice, Shallots, Garlic, Chili, Kecap Manis, Egg, Shrimp Paste." }
+        ]
+    }
+};
 
-// --- Storage Manager ---
+const DATA_VERSION = 'v3'; // Increment to force reset
+
 const storage = {
-    getTrips: () => {
-        const stored = localStorage.getItem('travel_trips');
+    getData: () => {
+        const stored = localStorage.getItem('travel_data');
         const version = localStorage.getItem('travel_version');
 
         if (!stored || version !== DATA_VERSION) {
             console.log('Resetting data to version:', DATA_VERSION);
-            localStorage.setItem('travel_trips', JSON.stringify(defaultData));
+            const data = { trips: defaultData, recipes: defaultRecipes };
+            localStorage.setItem('travel_data', JSON.stringify(data));
             localStorage.setItem('travel_version', DATA_VERSION);
-            return defaultData;
+            return data;
         }
         return JSON.parse(stored);
     },
-    saveTrip: (trip) => {
-        const trips = storage.getTrips();
-        trips[trip.id] = trip;
-        localStorage.setItem('travel_trips', JSON.stringify(trips));
-        return trips;
-    },
-    deleteTrip: (id) => {
-        const trips = storage.getTrips();
-        delete trips[id];
-        localStorage.setItem('travel_trips', JSON.stringify(trips));
-        return trips;
+    saveData: (data) => {
+        localStorage.setItem('travel_data', JSON.stringify(data));
+        return data;
     }
 };
 
 // --- Router & Renderer ---
 function render() {
     const hash = window.location.hash;
-    const trips = storage.getTrips();
+    const data = storage.getData();
 
     // Update Menu
-    renderMenu(trips);
+    renderMenu(data.trips);
 
     mainNav.classList.remove('active');
 
-    if (hash.startsWith('#trip/')) {
-        const tripId = hash.split('/')[1];
-        if (trips[tripId]) {
-            renderTrip(trips[tripId]);
-        } else {
-            renderLanding(trips);
-        }
+    if (hash === '#recipes') {
+        renderRecipeList(data.recipes);
+    } else if (hash.startsWith('#trip/')) {
+        const id = hash.split('/')[1];
+        if (data.trips[id]) renderTrip(data.trips[id], 'trip');
+        else renderLanding(data.trips);
+    } else if (hash.startsWith('#recipe/')) {
+        const id = hash.split('/')[1];
+        if (data.recipes[id]) renderTrip(data.recipes[id], 'recipe');
+        else renderRecipeList(data.recipes);
     } else {
-        renderLanding(trips);
+        renderLanding(data.trips);
     }
+}
+
+function renderRecipeList(recipes) {
+    app.innerHTML = `
+        <section class="hero" style="height:50vh; min-height:400px;">
+            <h1>Culinary Journey</h1>
+            <p>Flavors we brought back home.</p>
+            <div class="hero-menu">
+                ${Object.values(recipes).map(recipe => `
+                    <div class="trip-card" onclick="window.location.hash='#recipe/${recipe.id}'">
+                        <img src="${recipe.coverImage}" alt="${recipe.title}" loading="lazy">
+                        <div class="content">
+                            <span>${recipe.location}</span>
+                            <h3>${recipe.title}</h3>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+             <button onclick="openEditor(null, 'recipe')" style="margin-top:2rem; padding:10px 20px; background:var(--accent-color); border:none; border-radius:4px; font-weight:bold; cursor:pointer;">+ Add Recipe</button>
+        </section>
+    `;
+    document.title = "Recipes | Travel Log";
 }
 
 function renderMenu(trips) {
@@ -129,24 +160,25 @@ function renderLanding(trips) {
     document.title = "Wanderlust Chronicles";
 }
 
-function renderTrip(trip) {
+function renderTrip(item, type = 'trip') {
+    const backLink = type === 'recipe' ? '#recipes' : '#home';
     app.innerHTML = `
         <article class="trip-detail">
-            <a href="#home" class="back-home-btn" aria-label="Back to Home">←</a>
-            <button class="edit-trip-btn" onclick="openEditor('${trip.id}')" style="position:fixed; bottom:20px; right:20px; z-index:100; padding:10px 20px; background:var(--accent-color); border:none; border-radius:4px; font-weight:bold; cursor:pointer;">Edit Trip</button>
+            <a href="${backLink}" class="back-home-btn" aria-label="Back">←</a>
+            <button class="edit-trip-btn" onclick="openEditor('${item.id}', '${type}')" style="position:fixed; bottom:20px; right:20px; z-index:100; padding:10px 20px; background:var(--accent-color); border:none; border-radius:4px; font-weight:bold; cursor:pointer;">Edit ${type === 'recipe' ? 'Recipe' : 'Trip'}</button>
             <header>
                 <div class="trip-background">
-                    <img src="${trip.coverImage}" alt="${trip.title}">
+                    <img src="${item.coverImage}" alt="${item.title}">
                 </div>
                 <div class="header-content">
-                    <div class="date-location">${trip.date} : ${trip.location}</div>
-                    <h1>${trip.title}</h1>
+                    <div class="date-location">${item.date} : ${item.location}</div>
+                    <h1>${item.title}</h1>
                 </div>
             </header>
             
             <section class="trip-content">
                 <div class="trip-blocks">
-                    ${trip.blocks.map(block => {
+                    ${item.blocks.map(block => {
         if (block.type === 'text') return `<p>${block.content}</p>`;
         if (block.type === 'image') return `<div class="trip-image-block"><img src="${block.content}" alt="Trip Image"></div>`;
         return '';
@@ -156,28 +188,33 @@ function renderTrip(trip) {
         </article>
     `;
     window.scrollTo(0, 0);
-    document.title = `${trip.title} | Travel Log`;
+    document.title = `${item.title} | Travel Log`;
 }
 
 // --- Editor Logic ---
-window.openEditor = function (tripId) {
-    editorModal.classList.remove('hidden');
-    const trips = storage.getTrips();
+let currentEditType = 'trip'; // 'trip' or 'recipe'
 
-    if (tripId && trips[tripId]) {
+window.openEditor = function (id, type = 'trip') {
+    currentEditType = type;
+    editorModal.classList.remove('hidden');
+    const data = storage.getData();
+    const collection = type === 'recipe' ? data.recipes : data.trips;
+
+    document.getElementById('editor-title').innerText = id ? `Edit ${type === 'recipe' ? 'Recipe' : 'Trip'}` : `New ${type === 'recipe' ? 'Recipe' : 'Trip'}`;
+
+    if (id && collection[id]) {
         // Edit Mode
-        const trip = trips[tripId];
-        document.getElementById('editor-title').innerText = "Edit Trip";
-        document.getElementById('edit-id').value = trip.id;
-        document.getElementById('edit-title').value = trip.title;
-        document.getElementById('edit-date').value = trip.date;
-        document.getElementById('edit-location').value = trip.location;
-        document.getElementById('edit-cover').value = trip.coverImage;
+        const item = collection[id];
+        document.getElementById('edit-id').value = item.id;
+        document.getElementById('edit-title').value = item.title;
+        document.getElementById('edit-date').value = item.date;
+        document.getElementById('edit-location').value = item.location;
+        document.getElementById('edit-cover').value = item.coverImage;
         deleteTripBtn.classList.remove('hidden');
-        renderEditorBlocks(trip.blocks);
+        deleteTripBtn.innerText = `Delete ${type === 'recipe' ? 'Recipe' : 'Trip'}`;
+        renderEditorBlocks(item.blocks);
     } else {
         // Create Mode
-        document.getElementById('editor-title').innerText = "New Trip";
         document.getElementById('edit-id').value = "";
         document.getElementById('edit-title').value = "";
         document.getElementById('edit-date').value = "";
@@ -240,7 +277,7 @@ tripForm.onsubmit = (e) => {
         blocks.push({ type, content });
     });
 
-    const newTrip = {
+    const newItem = {
         id,
         title: document.getElementById('edit-title').value,
         date: document.getElementById('edit-date').value,
@@ -249,26 +286,40 @@ tripForm.onsubmit = (e) => {
         blocks
     };
 
-    storage.saveTrip(newTrip);
+    const data = storage.getData();
+    if (currentEditType === 'recipe') {
+        data.recipes[id] = newItem;
+    } else {
+        data.trips[id] = newItem;
+    }
+
+    storage.saveData(data);
     editorModal.classList.add('hidden');
-    render();
-    if (window.location.hash.includes(id)) renderTrip(newTrip); // Refresh if on page
+
+    // Redirect based on type
+    if (currentEditType === 'recipe') window.location.hash = `#recipe/${id}`;
     else window.location.hash = `#trip/${id}`;
+
+    render();
 };
 
 deleteTripBtn.onclick = () => {
     const id = document.getElementById('edit-id').value;
-    if (confirm('Are you sure you want to delete this trip?')) {
-        storage.deleteTrip(id);
+    if (confirm(`Are you sure you want to delete this ${currentEditType}?`)) {
+        const data = storage.getData();
+        if (currentEditType === 'recipe') delete data.recipes[id];
+        else delete data.trips[id];
+
+        storage.saveData(data);
         editorModal.classList.add('hidden');
-        window.location.hash = '#home';
+        window.location.hash = currentEditType === 'recipe' ? '#recipes' : '#home';
         render();
     }
 };
 
 newTripBtn.onclick = () => {
     mainNav.classList.remove('active');
-    openEditor(null);
+    openEditor(null, 'trip');
 };
 
 closeEditor.onclick = () => editorModal.classList.add('hidden');
