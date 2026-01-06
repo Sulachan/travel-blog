@@ -262,7 +262,7 @@ function renderAdmin(data) {
 
     document.getElementById('logout-btn').onclick = () => {
         signOut(auth).then(() => {
-            // onAuthStateChanged will trigger render
+            window.location.hash = ''; // Redirect to home
         });
     };
 }
@@ -576,7 +576,7 @@ window.addEventListener('hashchange', () => {
 });
 
 window.addEventListener('DOMContentLoaded', () => {
-    console.log("Script v18 loaded - Recipe UI Refined");
+    console.log("Script v19 loaded - Logout Redirect Fixed");
     initData();
 });
 
