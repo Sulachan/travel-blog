@@ -247,6 +247,10 @@ textarea:focus {
     padding: var(--gap-md);
     position: relative;
     overflow: hidden;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url('assets/images/home-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
 }
 
 .hero h1 {
