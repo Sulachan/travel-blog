@@ -1,3 +1,27 @@
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'firebase/auth';
+
+// --- Firebase Configuration ---
+const firebaseConfig = {
+    apiKey: "AIzaSyBTkEO-EVLVwpU121PhHSS9St9XPSZC6aQ",
+    authDomain: "travel-blog-auth.firebaseapp.com",
+    projectId: "travel-blog-auth",
+    storageBucket: "travel-blog-auth.firebasestorage.app",
+    messagingSenderId: "877186471798",
+    appId: "1:877186471798:web:c7a3f9f8ac8a9fb1938c57"
+};
+
+// Initialize Firebase
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+let currentUser = null;
+
+// Auth Listener
+onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    // Re-render to update UI (Menu, Admin access)
+    try { render(); } catch (e) { console.error("Render error after auth change", e); }
+});
 
 const app = document.getElementById('app');
 const mainNav = document.getElementById('main-nav');
