@@ -3,8 +3,8 @@ const app = document.getElementById('app');
 const mainNav = document.getElementById('main-nav');
 const dynamicNavLinks = document.getElementById('dynamic-nav-links');
 const menuToggle = document.getElementById('menu-toggle');
-const closeNav = document.getElementById('close-nav');
-const newTripBtn = document.getElementById('new-trip-btn');
+// const closeNav = document.getElementById('close-nav'); // Removed from HTML
+// const newTripBtn = document.getElementById('new-trip-btn'); // Removed from HTML
 
 // Editor Elements
 const editorModal = document.getElementById('editor-modal');
@@ -485,20 +485,27 @@ deleteTripBtn.onclick = () => {
 closeEditor.onclick = () => editorModal.classList.add('hidden');
 
 // Global Listeners
-window.addEventListener('hashchange', render);
-window.addEventListener('DOMContentLoaded', render);
+window.addEventListener('hashchange', () => {
+    try { render(); } catch (e) { alert("Render Error: " + e.message); console.error(e); }
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+    try { render(); } catch (e) { alert("Load Error: " + e.message); console.error(e); }
+});
 
 // Toggle Menu Button (Unified)
-menuToggle.addEventListener('click', () => {
-    mainNav.classList.toggle('active');
-    menuToggle.classList.toggle('active'); // For the spin animation
-});
+if (menuToggle) {
+    menuToggle.addEventListener('click', () => {
+        if (mainNav) mainNav.classList.toggle('active');
+        menuToggle.classList.toggle('active');
+    });
+}
 
 // Close menu when clicking a link inside it
 dynamicNavLinks.addEventListener('click', (e) => {
     if (e.target.tagName === 'A' || e.target.closest('a')) {
-        mainNav.classList.remove('active');
-        menuToggle.classList.remove('active');
+        if (mainNav) mainNav.classList.remove('active');
+        if (menuToggle) menuToggle.classList.remove('active');
         window.scrollTo(0, 0);
     }
 });
