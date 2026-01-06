@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 
 // --- Firebase Configuration ---
 const firebaseConfig = {
@@ -14,13 +15,16 @@ const firebaseConfig = {
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
 let currentUser = null;
+let appData = null; // In-memory data state
+let isLoaded = false;
 
 // Auth Listener
 onAuthStateChanged(auth, (user) => {
     currentUser = user;
     // Re-render to update UI (Menu, Admin access)
-    try { render(); } catch (e) { console.error("Render error after auth change", e); }
+    if (isLoaded) try { render(); } catch (e) { console.error("Render error after auth change", e); }
 });
 
 const app = document.getElementById('app');
@@ -85,33 +89,78 @@ const defaultRecipes = {
 
 const DATA_VERSION = 'v3'; // Increment to force reset
 
-const storage = {
-    getData: () => {
-        const stored = localStorage.getItem('travel_data');
-        const version = localStorage.getItem('travel_version');
+// --- Data Management (Firestore + Migration) ---
+async function initData() {
+    try {
+        const docRef = doc(db, "content", "main");
+        const docSnap = await getDoc(docRef);
 
-        if (!stored || version !== DATA_VERSION) {
-            console.log('Resetting data to version:', DATA_VERSION);
-            const data = { trips: defaultData, recipes: defaultRecipes };
-            localStorage.setItem('travel_data', JSON.stringify(data));
-            localStorage.setItem('travel_version', DATA_VERSION);
-            return data;
+        if (docSnap.exists()) {
+            // 1. Remote Data Exists - Use it
+            console.log("Loaded data from Firestore");
+            appData = docSnap.data();
+        } else {
+            // 2. Remote Empty - Check Local Storage for Migration
+            console.log("No remote data. Checking local...");
+            const localData = localStorage.getItem('travel_data');
+
+            if (localData) {
+                // Migrate Local -> Cloud
+                console.log("Migrating local data to cloud...");
+                appData = JSON.parse(localData);
+            } else {
+                // Full Default Start
+                console.log("No local data. Using defaults.");
+                appData = { trips: defaultData, recipes: defaultRecipes };
+            }
+
+            // Save initial state to Firestore
+            await setDoc(docRef, appData);
         }
-        return JSON.parse(stored);
-    },
-    saveData: (data) => {
-        localStorage.setItem('travel_data', JSON.stringify(data));
-        return data;
+
+        isLoaded = true;
+        render();
+
+    } catch (e) {
+        console.error("Data Load Error:", e);
+        // Fallback if offline or DB not setup
+        alert("Could not load database. Please ensure Firestore is enabled in Firebase Console. Using local backup/default for now.");
+        const local = localStorage.getItem('travel_data');
+        appData = local ? JSON.parse(local) : { trips: defaultData, recipes: defaultRecipes };
+        isLoaded = true;
+        render();
     }
-};
+}
+
+async function saveData(newData) {
+    appData = newData; // Optimistic update
+    render(); // Update UI immediately
+
+    try {
+        await setDoc(doc(db, "content", "main"), newData);
+        console.log("Data synced to cloud");
+        // Also update local for fallback
+        localStorage.setItem('travel_data', JSON.stringify(newData));
+    } catch (e) {
+        console.error("Save Error:", e);
+        alert("Error saving to cloud: " + e.message);
+    }
+}
 
 // --- Router & Renderer ---
 function render() {
+    if (!isLoaded) {
+        app.innerHTML = '<div style="height:100vh; display:flex; justify-content:center; align-items:center;">Loading content...</div>';
+        return;
+    }
+
     const hash = window.location.hash;
-    const data = storage.getData();
+    const data = appData;
 
     // Sort trips by date descending (Newest first)
-    const sortedTrips = Object.values(data.trips).sort((a, b) => {
+    // Check if data.trips exists to avoid crash on empty db
+    const triplist = data.trips || {};
+    const sortedTrips = Object.values(triplist).sort((a, b) => {
         if (a.date < b.date) return 1;
         if (a.date > b.date) return -1;
         return 0;
@@ -120,20 +169,20 @@ function render() {
     // Update Menu (Public - No Edit Buttons)
     renderMenu(sortedTrips);
 
-    mainNav.classList.remove('active');
+    if (mainNav) mainNav.classList.remove('active');
 
     if (hash === '#admin') {
         renderAdmin(data);
     } else if (hash === '#recipes') {
-        renderRecipeList(data.recipes);
+        renderRecipeList(data.recipes || {});
     } else if (hash.startsWith('#trip/')) {
         const id = hash.split('/')[1];
-        if (data.trips[id]) renderTrip(data.trips[id], 'trip');
+        if (data.trips && data.trips[id]) renderTrip(data.trips[id], 'trip');
         else renderLanding(sortedTrips);
     } else if (hash.startsWith('#recipe/')) {
         const id = hash.split('/')[1];
-        if (data.recipes[id]) renderTrip(data.recipes[id], 'recipe');
-        else renderRecipeList(data.recipes);
+        if (data.recipes && data.recipes[id]) renderTrip(data.recipes[id], 'recipe');
+        else renderRecipeList(data.recipes || {});
     } else {
         renderLanding(sortedTrips);
     }
@@ -381,8 +430,8 @@ function triggerBrowse(inputElement) {
 window.openEditor = function (id, type = 'trip') {
     currentEditType = type;
     editorModal.classList.remove('hidden');
-    const data = storage.getData();
-    const collection = type === 'recipe' ? data.recipes : data.trips;
+    // Data is now in appData
+    const collection = type === 'recipe' ? (appData.recipes || {}) : (appData.trips || {});
 
     document.getElementById('editor-title').innerText = id ? `Edit ${type === 'recipe' ? 'Recipe' : 'Trip'}` : `New ${type === 'recipe' ? 'Recipe' : 'Trip'}`;
     saveBtn.innerText = `Save ${type === 'recipe' ? 'Recipe' : 'Trip'}`;
@@ -498,11 +547,10 @@ tripForm.onsubmit = (e) => {
 deleteTripBtn.onclick = () => {
     const id = document.getElementById('edit-id').value;
     if (confirm(`Are you sure you want to delete this ${currentEditType}?`)) {
-        const data = storage.getData();
-        if (currentEditType === 'recipe') delete data.recipes[id];
-        else delete data.trips[id];
+        if (currentEditType === 'recipe') delete appData.recipes[id];
+        else delete appData.trips[id];
 
-        storage.saveData(data);
+        saveData(appData);
         editorModal.classList.add('hidden');
         window.location.hash = currentEditType === 'recipe' ? '#recipes' : '#home';
         render();
@@ -519,8 +567,8 @@ window.addEventListener('hashchange', () => {
 });
 
 window.addEventListener('DOMContentLoaded', () => {
-    console.log("Script v10 loaded");
-    try { render(); } catch (e) { alert("Load Error (v10): " + e.message); console.error(e); }
+    console.log("Script v11 loaded - initializing DB");
+    initData();
 });
 
 // Toggle Menu Button (Unified)
