@@ -239,7 +239,7 @@ function renderRecipeList(recipes) {
         <a href="#home" class="back-home-btn" aria-label="Back to Home">←</a>
         <section class="hero" style="height:auto; min-height:100vh; padding-top:100px; padding-bottom:100px; justify-content:flex-start; overflow:visible;">
             <h1>Culinary Journey</h1>
-            <p style="margin-bottom: 2rem;">Flavors i brought back home.</p>
+            <p style="margin-bottom: 2rem;">Flavors I brought back home.</p>
             <div class="hero-menu" style="opacity:1; animation:none;">
                 ${sortedRecipes.map(recipe => `
                     <div class="trip-card" onclick="window.location.hash='#recipe/${recipe.id}'">
@@ -519,8 +519,8 @@ window.addEventListener('hashchange', () => {
 });
 
 window.addEventListener('DOMContentLoaded', () => {
-    console.log("Script v8 loaded");
-    try { render(); } catch (e) { alert("Load Error (v8): " + e.message); console.error(e); }
+    console.log("Script v10 loaded");
+    try { render(); } catch (e) { alert("Load Error (v10): " + e.message); console.error(e); }
 });
 
 // Toggle Menu Button (Unified)
