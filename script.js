@@ -140,7 +140,10 @@ function renderAdmin(data) {
 
     app.innerHTML = `
         <section class="hero" style="height:auto; min-height:100vh; padding-top:100px; justify-content:flex-start;">
-            <h1>Dashboard</h1>
+            <div style="display:flex; justify-content:space-between; width:100%; max-width:800px; align-items:center;">
+                <h1>Dashboard</h1>
+                <button onclick="sessionStorage.removeItem('admin_auth'); render();" style="background:none; border:1px solid #666; color:#aaa; padding:5px 10px; cursor:pointer; border-radius:4px;">Logout</button>
+            </div>
             <div style="display:flex; gap:20px; margin-bottom:2rem;">
                  <button onclick="openEditor(null, 'trip')" class="save-btn" style="width:auto; padding:10px 20px;">+ New Trip</button>
                  <button onclick="openEditor(null, 'recipe')" class="save-btn" style="width:auto; padding:10px 20px;">+ New Recipe</button>
@@ -267,7 +270,6 @@ function renderTrip(item, type = 'trip') {
     app.innerHTML = `
         <article class="trip-detail">
             <a href="${backLink}" class="back-home-btn" aria-label="Back">←</a>
-            <button class="edit-trip-btn" onclick="openEditor('${item.id}', '${type}')" style="position:fixed; bottom:20px; right:20px; z-index:100; padding:10px 20px; background:var(--accent-color); border:none; border-radius:4px; font-weight:bold; cursor:pointer;">Edit ${type === 'recipe' ? 'Recipe' : 'Trip'}</button>
             <header>
                 <div class="trip-background">
                     <img src="${item.coverImage}" alt="${item.title}">
