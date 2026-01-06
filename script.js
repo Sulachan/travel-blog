@@ -251,7 +251,7 @@ function renderAdmin(data) {
                  <ul style="list-style:none; padding:0;">
                     ${sortedRecipesAdmin.map(recipe => `
                         <li style="display:flex; justify-content:space-between; padding:10px; background:rgba(255,255,255,0.05); margin-bottom:5px; border-radius:4px;">
-                            <span>${recipe.title} <span style="color:#666">(${recipe.country || "General"})</span></span>
+                            <span>${recipe.title} <span style="color:#666">(${recipe.country || recipe.location || "General"})</span></span>
                             <button onclick="window.location.hash='#recipe/${recipe.id}'; setTimeout(()=>openEditor('${recipe.id}', 'recipe'), 100)" style="cursor:pointer; color:var(--accent-color); background:none; border:none;">Edit</button>
                         </li>
                     `).join('')}
@@ -285,7 +285,7 @@ function renderRecipeList(recipes) {
                     <div class="trip-card" onclick="window.location.hash='#recipe/${recipe.id}'">
                         <img src="${recipe.coverImage}" alt="${recipe.title}" loading="lazy">
                         <div class="content">
-                            <span>${recipe.location}</span>
+                            <span>${recipe.country || recipe.location || "General"}</span>
                             <h3>${recipe.title}</h3>
                         </div>
                     </div>
@@ -372,7 +372,7 @@ function renderTrip(item, type = 'trip') {
                     <img src="${item.coverImage}" alt="${item.title}">
                 </div>
                 <div class="header-content">
-                    <div class="date-location">${item.date} : ${item.location}</div>
+                    <div class="date-location">${[item.date, item.location || item.country].filter(Boolean).join(' : ')}</div>
                     <h1>${item.title}</h1>
                 </div>
             </header>
