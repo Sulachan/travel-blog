@@ -147,16 +147,45 @@ function renderRecipeList(recipes) {
 
 function renderMenu(sortedTripArray) {
     dynamicNavLinks.innerHTML = `
-        <ul style="list-style:none; text-align:center;">
+        <ul style="list-style:none; text-align:center; padding:0;">
             <li><a href="#home" class="nav-link" data-route="home">Home</a></li>
             <li><a href="#recipes" class="nav-link">Recipes</a></li>
-             ${sortedTripArray.map(trip => `
-                <li><a href="#trip/${trip.id}" class="nav-link">${trip.title} ${trip.date}</a></li>
-             `).join('')}
-             <li><button id="new-trip-btn" class="nav-link" style="background:none; border:none; cursor:pointer;">+ New Trip</button></li>
+            
+            <!-- Trips Toggle -->
+            <li>
+                <button id="trips-toggle" class="nav-link" style="background:none; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:10px;">
+                    Trips <span id="trips-arrow" style="font-size:1.5rem; transition:transform 0.3s;">▼</span>
+                </button>
+                <div id="trips-submenu" style="max-height:0; overflow:hidden; transition:max-height 0.3s ease-out; background:rgba(255,255,255,0.05); margin-top:10px; border-radius:8px;">
+                    <ul style="list-style:none; padding:1rem 0;">
+                        ${sortedTripArray.map(trip => `
+                            <li style="margin:10px 0; opacity:1; transform:none;"><a href="#trip/${trip.id}" class="nav-link" style="font-size:1.5rem;">${trip.title} ${trip.date}</a></li>
+                        `).join('')}
+                    </ul>
+                </div>
+            </li>
+
+            <li><button id="new-trip-btn" class="nav-link" style="background:none; border:none; cursor:pointer; font-size:1.5rem; margin-top:2rem; color:#aaa;">+ New Trip</button></li>
         </ul>
     `;
-    // Re-bind new trip button since we overwrote the innerHTML
+
+    // Toggle Logic
+    const toggleBtn = document.getElementById('trips-toggle');
+    const submenu = document.getElementById('trips-submenu');
+    const arrow = document.getElementById('trips-arrow');
+
+    toggleBtn.onclick = (e) => {
+        e.stopPropagation(); // Prevent closing nav
+        if (submenu.style.maxHeight === '0px' || !submenu.style.maxHeight) {
+            submenu.style.maxHeight = submenu.scrollHeight + 'px';
+            arrow.style.transform = 'rotate(180deg)';
+        } else {
+            submenu.style.maxHeight = '0px';
+            arrow.style.transform = 'rotate(0deg)';
+        }
+    };
+
+    // Re-bind new trip button
     document.getElementById('new-trip-btn').onclick = () => {
         mainNav.classList.remove('active');
         openEditor(null, 'trip');
