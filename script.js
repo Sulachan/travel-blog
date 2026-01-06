@@ -273,8 +273,9 @@ function renderMenu(sortedTripArray) {
 
             <li><a href="#recipes" class="nav-link">Recipes</a></li>
             
-            ${currentUser ? '<li><a href="#admin" class="nav-link" style="color:var(--accent-color);">Manage</a></li>' : ''}
-            
+            ${currentUser
+            ? '<li><a href="#admin" class="nav-link" style="color:var(--accent-color);">Manage</a></li>'
+            : '<li><a href="#admin" class="nav-link" style="font-size:1.2rem; color:#666;">Login</a></li>'}
         </ul>
     `;
 
