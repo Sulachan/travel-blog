@@ -108,6 +108,7 @@ function render() {
 
 function renderRecipeList(recipes) {
     app.innerHTML = `
+        <a href="#home" class="back-home-btn" aria-label="Back to Home">←</a>
         <section class="hero" style="height:auto; min-height:100vh; padding-top:100px; padding-bottom:100px; justify-content:flex-start; overflow:visible;">
             <h1>Culinary Journey</h1>
             <p style="margin-bottom: 2rem;">Flavors we brought back home.</p>
