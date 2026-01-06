@@ -123,8 +123,9 @@ async function initData() {
 
     } catch (e) {
         console.error("Data Load Error:", e);
-        // Fallback if offline or DB not setup
-        alert("Could not load database. Please ensure Firestore is enabled in Firebase Console. Using local backup/default for now.");
+        // Specialized Error Reporting
+        alert(`Database Error (${e.code || 'unknown'}): ${e.message}\n\nCheck console for details.`);
+
         const local = localStorage.getItem('travel_data');
         appData = local ? JSON.parse(local) : { trips: defaultData, recipes: defaultRecipes };
         isLoaded = true;
