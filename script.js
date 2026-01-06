@@ -141,6 +141,18 @@ function renderAdmin(data) {
         return;
     }
 
+    // Sort recipes by Country (or Title as fallback)
+    const sortedRecipesAdmin = Object.values(data.recipes).sort((a, b) => {
+        const countryA = (a.country || a.location || "").toLowerCase();
+        const countryB = (b.country || b.location || "").toLowerCase();
+        if (countryA < countryB) return -1;
+        if (countryA > countryB) return 1;
+        return 0;
+    });
+
+    // Trips already sorted by date in render() pass, but let's resort here to be sure
+    const sortedTripsAdmin = Object.values(data.trips).sort((a, b) => (a.date < b.date ? 1 : -1));
+
     app.innerHTML = `
         <section class="hero" style="height:auto; min-height:100vh; padding-top:100px; justify-content:flex-start;">
             <div style="display:flex; justify-content:space-between; width:100%; max-width:800px; align-items:center;">
@@ -157,21 +169,21 @@ function renderAdmin(data) {
             </div>
             
             <div style="width:100%; max-width:800px; text-align:left;">
-                <h2 style="border-bottom:1px solid var(--accent-color); margin-bottom:1rem;">Trips</h2>
+                <h2 style="border-bottom:1px solid var(--accent-color); margin-bottom:1rem;">Trips <small style="font-size:0.8rem; font-weight:normal;">(Date)</small></h2>
                 <ul style="list-style:none; padding:0;">
-                    ${Object.values(data.trips).map(trip => `
+                    ${sortedTripsAdmin.map(trip => `
                         <li style="display:flex; justify-content:space-between; padding:10px; background:rgba(255,255,255,0.05); margin-bottom:5px; border-radius:4px;">
-                            <span>${trip.title}</span>
+                            <span>${trip.title} <span style="color:#666">(${trip.date})</span></span>
                             <button onclick="window.location.hash='#trip/${trip.id}'; setTimeout(()=>openEditor('${trip.id}', 'trip'), 100)" style="cursor:pointer; color:var(--accent-color); background:none; border:none;">Edit</button>
                         </li>
                     `).join('')}
                 </ul>
 
-                <h2 style="border-bottom:1px solid var(--accent-color); margin:2rem 0 1rem;">Recipes</h2>
+                <h2 style="border-bottom:1px solid var(--accent-color); margin:2rem 0 1rem;">Recipes <small style="font-size:0.8rem; font-weight:normal;">(Country)</small></h2>
                  <ul style="list-style:none; padding:0;">
-                    ${Object.values(data.recipes).map(recipe => `
+                    ${sortedRecipesAdmin.map(recipe => `
                         <li style="display:flex; justify-content:space-between; padding:10px; background:rgba(255,255,255,0.05); margin-bottom:5px; border-radius:4px;">
-                            <span>${recipe.title}</span>
+                            <span>${recipe.title} <span style="color:#666">(${recipe.country || "General"})</span></span>
                             <button onclick="window.location.hash='#recipe/${recipe.id}'; setTimeout(()=>openEditor('${recipe.id}', 'recipe'), 100)" style="cursor:pointer; color:var(--accent-color); background:none; border:none;">Edit</button>
                         </li>
                     `).join('')}
@@ -236,6 +248,9 @@ function renderMenu(sortedTripArray) {
             </li>
 
             <li><a href="#recipes" class="nav-link">Recipes</a></li>
+            
+            ${currentUser ? '<li><a href="#admin" class="nav-link" style="color:var(--accent-color);">Manage</a></li>' : ''}
+            
         </ul>
     `;
 
@@ -472,5 +487,18 @@ closeEditor.onclick = () => editorModal.classList.add('hidden');
 // Global Listeners
 window.addEventListener('hashchange', render);
 window.addEventListener('DOMContentLoaded', render);
-menuToggle.addEventListener('click', () => mainNav.classList.add('active'));
-closeNav.addEventListener('click', () => mainNav.classList.remove('active'));
+
+// Toggle Menu Button (Unified)
+menuToggle.addEventListener('click', () => {
+    mainNav.classList.toggle('active');
+    menuToggle.classList.toggle('active'); // For the spin animation
+});
+
+// Close menu when clicking a link inside it
+dynamicNavLinks.addEventListener('click', (e) => {
+    if (e.target.tagName === 'A' || e.target.closest('a')) {
+        mainNav.classList.remove('active');
+        menuToggle.classList.remove('active');
+        window.scrollTo(0, 0);
+    }
+});

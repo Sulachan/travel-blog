@@ -20,11 +20,11 @@
 
     <!-- Navigation Overlay -->
     <nav id="main-nav">
-        <button id="close-nav" aria-label="Close navigation">&times;</button>
+        <!-- Close is handled by the main toggle button now -->
         <div id="dynamic-nav-links"></div>
     </nav>
 
-    <button id="menu-toggle" aria-label="Open menu">
+    <button id="menu-toggle" aria-label="Toggle menu">
         <span class="line"></span>
         <span class="line"></span>
     </button>
@@ -42,6 +42,11 @@
                 <div class="form-group">
                     <label>Title</label>
                     <input type="text" id="edit-title" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Country (for Recipes)</label>
+                    <input type="text" id="edit-country" placeholder="e.g. Indonesia">
                 </div>
 
                 <div class="form-group">
@@ -78,7 +83,16 @@
         </div>
     </div>
 
-    <script src="script.js?v=4" type="module"></script>
+    <!-- Firebase SDK Setup -->
+    <script type="importmap">
+      {
+        "imports": {
+          "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+          "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"
+        }
+      }
+    </script>
+    <script src="script.js?v=6" type="module"></script>
 </body>
 
 </html>
