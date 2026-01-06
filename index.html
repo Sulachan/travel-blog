@@ -42,6 +42,8 @@
             <h2 id="editor-title">Edit Trip</h2>
             <form id="trip-form">
                 <input type="hidden" id="edit-id">
+                <!-- Hidden File Input for Image Uploads -->
+                <input type="file" id="file-picker" accept="image/*" class="hidden">
 
                 <div class="form-group">
                     <label>Title</label>
@@ -59,8 +61,12 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Cover Image URL (or path)</label>
-                    <input type="text" id="edit-cover" required>
+                    <label>Cover Image</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="edit-cover" required placeholder="Image URL or Browse...">
+                        <button type="button" id="browse-cover-btn"
+                            style="padding:0.5rem; cursor:pointer;">Browse</button>
+                    </div>
                 </div>
 
                 <div class="form-group">

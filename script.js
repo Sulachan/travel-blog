@@ -192,7 +192,30 @@ function renderTrip(item, type = 'trip') {
 }
 
 // --- Editor Logic ---
-let currentEditType = 'trip'; // 'trip' or 'recipe'
+let currentEditType = 'trip';
+let currentInputTarget = null; // To track which input should receive the image path
+
+const filePicker = document.getElementById('file-picker');
+const browseCoverBtn = document.getElementById('browse-cover-btn');
+const saveBtn = document.querySelector('.save-btn');
+
+// File Upload Handler
+filePicker.onchange = (e) => {
+    const file = e.target.files[0];
+    if (file && currentInputTarget) {
+        const reader = new FileReader();
+        reader.onload = function (evt) {
+            currentInputTarget.value = evt.target.result; // Base64 Data URL
+        };
+        reader.readAsDataURL(file);
+    }
+    filePicker.value = ''; // Reset
+};
+
+function triggerBrowse(inputElement) {
+    currentInputTarget = inputElement;
+    filePicker.click();
+}
 
 window.openEditor = function (id, type = 'trip') {
     currentEditType = type;
@@ -201,6 +224,7 @@ window.openEditor = function (id, type = 'trip') {
     const collection = type === 'recipe' ? data.recipes : data.trips;
 
     document.getElementById('editor-title').innerText = id ? `Edit ${type === 'recipe' ? 'Recipe' : 'Trip'}` : `New ${type === 'recipe' ? 'Recipe' : 'Trip'}`;
+    saveBtn.innerText = `Save ${type === 'recipe' ? 'Recipe' : 'Trip'}`;
 
     if (id && collection[id]) {
         // Edit Mode
@@ -225,40 +249,47 @@ window.openEditor = function (id, type = 'trip') {
     }
 };
 
+browseCoverBtn.onclick = () => triggerBrowse(document.getElementById('edit-cover'));
+
 function renderEditorBlocks(blocks) {
     editorBlocks.innerHTML = '';
-    blocks.forEach((block, index) => {
-        const div = document.createElement('div');
-        div.className = 'editor-block-item';
-        div.innerHTML = `
-            <span class="block-type">${block.type.toUpperCase()}</span>
-            ${block.type === 'text'
-                ? `<textarea class="block-content" rows="3">${block.content}</textarea>`
-                : `<input type="text" class="block-content" value="${block.content}" placeholder="Image URL">`
-            }
-            <button type="button" class="remove-block">&times;</button>
-        `;
-
-        div.querySelector('.remove-block').onclick = () => {
-            div.remove();
-        };
-        editorBlocks.appendChild(div);
+    blocks.forEach((block) => {
+        createBlockElement(block.type, block.content);
     });
 }
 
-function addBlock(type) {
+function createBlockElement(type, content = '') {
     const div = document.createElement('div');
     div.className = 'editor-block-item';
+
+    let inputHtml = '';
+    if (type === 'text') {
+        inputHtml = `<textarea class="block-content" rows="3">${content}</textarea>`;
+    } else {
+        inputHtml = `
+            <div style="flex:1; display:flex; gap:10px;">
+                <input type="text" class="block-content" value="${content}" placeholder="Image URL">
+                <button type="button" class="browse-btn" style="padding:0.2rem 0.5rem;">Browse</button>
+            </div>`;
+    }
+
     div.innerHTML = `
         <span class="block-type">${type.toUpperCase()}</span>
-        ${type === 'text'
-            ? `<textarea class="block-content" rows="3"></textarea>`
-            : `<input type="text" class="block-content" placeholder="Image URL">`
-        }
+        ${inputHtml}
         <button type="button" class="remove-block">&times;</button>
     `;
+
+    if (type === 'image') {
+        const input = div.querySelector('input.block-content');
+        div.querySelector('.browse-btn').onclick = () => triggerBrowse(input);
+    }
+
     div.querySelector('.remove-block').onclick = () => div.remove();
     editorBlocks.appendChild(div);
+}
+
+function addBlock(type) {
+    createBlockElement(type);
 }
 
 // Event Listeners
