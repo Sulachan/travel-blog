@@ -182,6 +182,7 @@ function render() {
 function renderAdmin(data) {
     if (!currentUser) {
         app.innerHTML = `
+            <a href="#home" class="back-home-btn" aria-label="Back to Home">←</a>
             <section class="hero" style="background:var(--bg-color);">
                 <h1>Admin Access</h1>
                 <p>Please log in to manage your content.</p>
@@ -488,6 +489,11 @@ function createBlockElement(type, content = '') {
                     <button type="button" onclick="document.execCommand('bold', false, null)"><b>B</b></button>
                     <button type="button" onclick="document.execCommand('italic', false, null)"><i>I</i></button>
                     <button type="button" onclick="document.execCommand('underline', false, null)"><u>U</u></button>
+                    <select onchange="document.execCommand('formatBlock', false, this.value)" style="background:#333; color:#fff; border:1px solid #444; font-size:0.8rem;">
+                        <option value="p">Normal</option>
+                        <option value="h2">Title</option>
+                        <option value="h3">Subtitle</option>
+                    </select>
                     <select onchange="document.execCommand('fontName', false, this.value)" style="background:#333; color:#fff; border:1px solid #444; font-size:0.8rem;">
                         <option value="Outfit">Outfit</option>
                         <option value="Playfair Display">Playfair</option>
