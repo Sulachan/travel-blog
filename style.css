@@ -480,6 +480,32 @@ textarea:focus {
     margin-bottom: 1rem;
 }
 
+.trip-text-block h2 {
+    font-size: 2rem;
+    color: var(--accent-color);
+    margin: 2rem 0 1rem;
+    font-family: var(--font-heading);
+}
+
+.trip-text-block h3 {
+    font-size: 1.5rem;
+    color: #fff;
+    margin: 1.5rem 0 0.75rem;
+    font-family: var(--font-heading);
+    font-weight: 400;
+}
+
+/* Ensure rich text editor also reflects these styles */
+.block-content-rich h2 {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+}
+
+.block-content-rich h3 {
+    font-size: 1.25rem;
+    color: #fff;
+}
+
 .trip-gallery {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

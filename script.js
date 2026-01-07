@@ -160,7 +160,15 @@ function render() {
     // Update Menu (Public - No Edit Buttons)
     renderMenu(sortedTrips);
 
-    if (mainNav) mainNav.classList.remove('active');
+    if (mainNav) {
+        if (sessionStorage.getItem('reopenMenu') === 'true') {
+            mainNav.classList.add('active');
+            if (menuToggle) menuToggle.classList.add('active');
+            sessionStorage.removeItem('reopenMenu');
+        } else {
+            mainNav.classList.remove('active');
+        }
+    }
 
     if (hash === '#admin') {
         renderAdmin(data);
@@ -182,7 +190,7 @@ function render() {
 function renderAdmin(data) {
     if (!currentUser) {
         app.innerHTML = `
-            <a href="#home" class="back-home-btn" aria-label="Back to Home">←</a>
+            <button class="back-home-btn" aria-label="Back" onclick="sessionStorage.setItem('reopenMenu', 'true'); history.back();" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); cursor:pointer;">←</button>
             <section class="hero" style="background:var(--bg-color);">
                 <h1>Admin Access</h1>
                 <p>Please log in to manage your content.</p>
@@ -223,6 +231,7 @@ function renderAdmin(data) {
     const sortedTripsAdmin = Object.values(data.trips).sort((a, b) => (a.date < b.date ? 1 : -1));
 
     app.innerHTML = `
+        <button class="back-home-btn" aria-label="Back" onclick="sessionStorage.setItem('reopenMenu', 'true'); history.back();" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); cursor:pointer;">←</button>
         <section class="hero" style="height:auto; min-height:100vh; padding-top:100px; justify-content:flex-start;">
             <div style="display:flex; justify-content:space-between; width:100%; max-width:800px; align-items:center;">
                 <h1 style="font-size:2rem;">Dashboard</h1>
