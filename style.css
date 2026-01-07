@@ -215,13 +215,83 @@ textarea:focus {
     transform: scale(1.1);
 }
 
-.trip-image-block {
-    margin: var(--gap-md) 0;
-}
 
 .trip-image-block img {
     width: 100%;
     border-radius: 4px;
+}
+
+/* Edit Button Inline */
+.edit-btn-inline {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.edit-btn-inline:hover {
+    background: var(--accent-color);
+    color: #000;
+}
+
+/* Toolbar Styling */
+.editor-toolbar {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 5px;
+    background: #222;
+    padding: 5px;
+    border-radius: 4px 4px 0 0;
+    border: 1px solid #333;
+    border-bottom: none;
+}
+
+.editor-toolbar button {
+    background: #333;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 2px 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    border-radius: 2px;
+}
+
+.editor-toolbar button:hover {
+    background: #444;
+}
+
+.editor-toolbar input[type="color"] {
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    border: none;
+    cursor: pointer;
+    background: none;
+}
+
+/* Content Editable Text Area */
+.block-content-rich {
+    min-height: 100px;
+    padding: 10px;
+    background: #000;
+    border: 1px solid #333;
+    color: #fff;
+    border-radius: 0 0 4px 4px;
+    font-family: var(--font-body);
+    overflow-y: auto;
+}
+
+.block-content-rich:focus {
+    border-color: var(--accent-color);
+    outline: none;
 }
 
 /* Utilities */
@@ -396,10 +466,19 @@ textarea:focus {
     padding: var(--gap-lg) var(--gap-md);
 }
 
-.trip-text p {
+.trip-blocks>* {
     margin-bottom: var(--gap-md);
+}
+
+.trip-text-block {
     font-size: 1.125rem;
     color: #ccc;
+    line-height: 1.8;
+    white-space: pre-wrap;
+}
+
+.trip-text-block p {
+    margin-bottom: 1rem;
 }
 
 .trip-gallery {

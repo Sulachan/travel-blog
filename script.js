@@ -374,13 +374,14 @@ function renderTrip(item, type = 'trip') {
                 <div class="header-content">
                     <div class="date-location">${[item.date, item.location || item.country].filter(Boolean).join(' : ')}</div>
                     <h1>${item.title}</h1>
+                    ${currentUser ? `<button class="edit-btn-inline" onclick="openEditor('${item.id}', '${type}')">Edit ${type === 'recipe' ? 'Recipe' : 'Trip'}</button>` : ''}
                 </div>
             </header>
             
             <section class="trip-content">
                 <div class="trip-blocks">
                     ${item.blocks.map(block => {
-        if (block.type === 'text') return `<p>${block.content}</p>`;
+        if (block.type === 'text') return `<div class="trip-text-block">${block.content}</div>`;
         if (block.type === 'image') return `<div class="trip-image-block"><img src="${block.content}" alt="Trip Image"></div>`;
         return '';
     }).join('')}
@@ -481,7 +482,22 @@ function createBlockElement(type, content = '') {
 
     let inputHtml = '';
     if (type === 'text') {
-        inputHtml = `<textarea class="block-content" rows="3">${content}</textarea>`;
+        inputHtml = `
+            <div style="flex:1;">
+                <div class="editor-toolbar">
+                    <button type="button" onclick="document.execCommand('bold', false, null)"><b>B</b></button>
+                    <button type="button" onclick="document.execCommand('italic', false, null)"><i>I</i></button>
+                    <button type="button" onclick="document.execCommand('underline', false, null)"><u>U</u></button>
+                    <select onchange="document.execCommand('fontName', false, this.value)" style="background:#333; color:#fff; border:1px solid #444; font-size:0.8rem;">
+                        <option value="Outfit">Outfit</option>
+                        <option value="Playfair Display">Playfair</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Courier New">Monospace</option>
+                    </select>
+                    <input type="color" onchange="document.execCommand('foreColor', false, this.value)" title="Text Color">
+                </div>
+                <div class="block-content-rich" contenteditable="true">${content}</div>
+            </div>`;
     } else {
         inputHtml = `
             <div style="flex:1; display:flex; gap:10px;">
@@ -521,7 +537,12 @@ tripForm.onsubmit = (e) => {
     const blocks = [];
     document.querySelectorAll('.editor-block-item').forEach(item => {
         const type = item.querySelector('.block-type').innerText.toLowerCase();
-        const content = item.querySelector('.block-content').value;
+        let content = '';
+        if (type === 'text') {
+            content = item.querySelector('.block-content-rich').innerHTML;
+        } else {
+            content = item.querySelector('.block-content').value;
+        }
         blocks.push({ type, content });
     });
 
