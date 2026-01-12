@@ -564,14 +564,14 @@ function createBlockElement(type, content = '') {
             <div style="flex:1;" class="image-block-container">
                 <div class="image-list">
                     ${images.map((url, idx) => `
-                        <div class="image-item" style="display:flex; gap:10px; margin-bottom:5px;">
+                        <div class="image-item" style="display:flex; gap:10px; margin-bottom:5px; align-items:center;">
                             <input type="text" class="block-content-image" value="${url}" placeholder="Image URL ${idx + 1}">
-                            <button type="button" class="browse-btn" style="padding:0.2rem 0.5rem;">Browse</button>
-                            ${images.length > 1 ? '<button type="button" class="remove-image-btn" style="padding:0.2rem 0.5rem; background:#c0392b; color:#fff;">&times;</button>' : ''}
+                            <button type="button" class="browse-btn" style="padding:0.4rem 0.8rem; background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:4px; cursor:pointer; transition:all 0.3s ease;">Browse</button>
+                            ${images.length > 1 ? '<button type="button" class="remove-image-btn" style="padding:0.4rem; background:rgba(192,57,43,0.2); color:#e74c3c; border:1px solid #e74c3c; border-radius:4px; cursor:pointer; width:2rem; height:2rem; display:flex; align-items:center; justify-content:center; transition:all 0.3s ease;">&times;</button>' : ''}
                         </div>
                     `).join('')}
                 </div>
-                <button type="button" class="add-image-btn" style="margin-top:5px; padding:0.3rem 0.7rem; background:var(--accent-color); color:#000; border:none; cursor:pointer; border-radius:4px;">+ Add Image</button>
+                <button type="button" class="add-image-btn" style="margin-top:8px; padding:0.5rem 1rem; background:rgba(212,175,55,0.2); color:var(--accent-color); border:1px solid var(--accent-color); cursor:pointer; border-radius:4px; font-family:var(--font-body); transition:all 0.3s ease; backdrop-filter:blur(5px);">+ Add Image</button>
             </div>`;
     }
 
@@ -601,8 +601,8 @@ function createBlockElement(type, content = '') {
             newItem.style.cssText = 'display:flex; gap:10px; margin-bottom:5px;';
             newItem.innerHTML = `
                 <input type="text" class="block-content-image" value="" placeholder="Image URL ${newIdx + 1}">
-                <button type="button" class="browse-btn" style="padding:0.2rem 0.5rem;">Browse</button>
-                <button type="button" class="remove-image-btn" style="padding:0.2rem 0.5rem; background:#c0392b; color:#fff;">&times;</button>
+                <button type="button" class="browse-btn" style="padding:0.4rem 0.8rem; background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:4px; cursor:pointer; transition:all 0.3s ease;">Browse</button>
+                <button type="button" class="remove-image-btn" style="padding:0.4rem; background:rgba(192,57,43,0.2); color:#e74c3c; border:1px solid #e74c3c; border-radius:4px; cursor:pointer; width:2rem; height:2rem; display:flex; align-items:center; justify-content:center; transition:all 0.3s ease;">&times;</button>
             `;
             imageList.appendChild(newItem);
 
@@ -764,11 +764,11 @@ const lightboxClose = document.querySelector('.lightbox-close');
 const lightboxPrev = document.querySelector('.lightbox-prev');
 const lightboxNext = document.querySelector('.lightbox-next');
 
-window.openLightbox = function(blockIdx, imgIdx) {
+window.openLightbox = function (blockIdx, imgIdx) {
     // Get the current trip/recipe data
     const hash = window.location.hash;
     let item = null;
-    
+
     if (hash.startsWith('#trip/')) {
         const id = hash.substring(6);
         item = appData.trips?.[id];
@@ -776,27 +776,27 @@ window.openLightbox = function(blockIdx, imgIdx) {
         const id = hash.substring(8);
         item = appData.recipes?.[id];
     }
-    
+
     if (!item || !item.blocks[blockIdx]) return;
-    
+
     const block = item.blocks[blockIdx];
     currentLightboxImages = Array.isArray(block.content) ? block.content : [block.content];
     currentLightboxIndex = imgIdx;
-    
+
     showLightboxImage();
     lightbox.classList.add('active');
 };
 
 function showLightboxImage() {
     lightboxImg.src = currentLightboxImages[currentLightboxIndex];
-    
+
     // Show/hide navigation buttons
     if (currentLightboxIndex === 0) {
         lightboxPrev.classList.add('hidden');
     } else {
         lightboxPrev.classList.remove('hidden');
     }
-    
+
     if (currentLightboxIndex === currentLightboxImages.length - 1) {
         lightboxNext.classList.add('hidden');
     } else {
@@ -838,7 +838,7 @@ lightboxNext.onclick = (e) => {
 // Keyboard navigation
 document.addEventListener('keydown', (e) => {
     if (!lightbox.classList.contains('active')) return;
-    
+
     if (e.key === 'Escape') {
         closeLightbox();
     } else if (e.key === 'ArrowLeft' && currentLightboxIndex > 0) {

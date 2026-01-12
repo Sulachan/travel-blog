@@ -693,6 +693,7 @@ textarea:focus {
         font-size: 1.2rem;
     }
 }
+
 /* Trip Image Gallery */
 .trip-image-gallery {
     display: flex;
@@ -703,6 +704,8 @@ textarea:focus {
     scrollbar-width: thin;
     scrollbar-color: var(--accent-color) #222;
     margin-bottom: 2rem;
+    width: 100%;
+    /* Full page width */
 }
 
 .trip-image-gallery::-webkit-scrollbar {
@@ -716,7 +719,9 @@ textarea:focus {
 
 .trip-image-gallery .gallery-item {
     flex: 0 0 auto;
-    width: 80%;
+    width: calc(33.333% - 10px);
+    /* Show ~3 images at a time */
+    min-width: 300px;
     max-width: 500px;
     scroll-snap-align: center;
     cursor: pointer;
@@ -804,8 +809,13 @@ textarea:focus {
     color: var(--accent-color);
 }
 
-.lightbox-prev { left: 20px; }
-.lightbox-next { right: 20px; }
+.lightbox-prev {
+    left: 20px;
+}
+
+.lightbox-next {
+    right: 20px;
+}
 
 .lightbox-nav.hidden {
     display: none;
