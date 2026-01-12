@@ -140,7 +140,10 @@ async function saveData(newData) {
         console.log("Cloud Saved");
     } catch (e) {
         console.error("Save failed:", e);
-        alert("Sync Failed: Your changes are saved locally, but not to the cloud. (" + e.code + ")");
+        console.error("Error code:", e.code);
+        console.error("Error message:", e.message);
+        console.error("Data being saved:", JSON.stringify(newData, null, 2));
+        alert("Sync Failed: Your changes are saved locally, but not to the cloud.\nError: " + e.message + "\nCheck console for details.");
     }
 }
 
