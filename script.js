@@ -129,6 +129,12 @@ async function saveData(newData) {
     render();
     localStorage.setItem('travel_data', JSON.stringify(newData));
 
+    // Only attempt cloud save if user is authenticated
+    if (!currentUser) {
+        console.log("Not logged in - saved locally only");
+        return;
+    }
+
     try {
         await setDoc(doc(db, "content", "main"), newData);
         console.log("Cloud Saved");
