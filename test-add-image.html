@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Add Image</title>
+    <style>
+        body {
+            padding: 20px;
+            background: #0a0a0a;
+            color: #fff;
+            font-family: Arial;
+        }
+
+        .editor-block-item {
+            border: 1px solid #333;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .image-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        input {
+            padding: 5px;
+            flex: 1;
+        }
+
+        button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .add-image-btn {
+            background: #d4af37;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+
+        .remove-image-btn {
+            background: #c0392b;
+            color: #fff;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Test Image Block</h2>
+    <div id="test-container"></div>
+
+    <script>
+        function createBlockElement(type, content = '') {
+            const div = document.createElement('div');
+            div.className = 'editor-block-item';
+
+            let inputHtml = '';
+            if (type === 'image') {
+                const images = Array.isArray(content) ? content : (content ? [content] : ['']);
+                inputHtml = `
+                    <div style="flex:1;" class="image-block-container">
+                        <div class="image-list">
+                            ${images.map((url, idx) => `
+                                <div class="image-item">
+                                    <input type="text" class="block-content-image" value="${url}" placeholder="Image URL ${idx + 1}">
+                                    <button type="button" class="browse-btn">Browse</button>
+                                    ${images.length > 1 ? '<button type="button" class="remove-image-btn">&times;</button>' : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button type="button" class="add-image-btn">+ Add Image</button>
+                    </div>`;
+            }
+
+            div.innerHTML = `
+                <span class="block-type">${type.toUpperCase()}</span>
+                ${inputHtml}
+            `;
+
+            if (type === 'image') {
+                // Setup "Add Image" button
+                const addBtn = div.querySelector('.add-image-btn');
+                console.log('Add button found:', addBtn);
+
+                addBtn.onclick = () => {
+                    console.log('Add Image clicked!');
+                    const imageList = div.querySelector('.image-list');
+                    const newIdx = imageList.querySelectorAll('.image-item').length;
+                    const newItem = document.createElement('div');
+                    newItem.className = 'image-item';
+                    newItem.innerHTML = `
+                        <input type="text" class="block-content-image" value="" placeholder="Image URL ${newIdx + 1}">
+                        <button type="button" class="browse-btn">Browse</button>
+                        <button type="button" class="remove-image-btn">&times;</button>
+                    `;
+                    imageList.appendChild(newItem);
+
+                    const newRemoveBtn = newItem.querySelector('.remove-image-btn');
+                    newRemoveBtn.onclick = () => {
+                        newItem.remove();
+                    };
+                };
+
+                // Setup existing remove buttons
+                div.querySelectorAll('.remove-image-btn').forEach(btn => {
+                    btn.onclick = () => {
+                        btn.closest('.image-item').remove();
+                    };
+                });
+            }
+
+            return div;
+        }
+
+        // Test
+        const container = document.getElementById('test-container');
+        const block = createBlockElement('image', ['https://example.com/image1.jpg']);
+        container.appendChild(block);
+    </script>
+</body>
+
+</html>
