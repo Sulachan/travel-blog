@@ -218,8 +218,7 @@ textarea:focus {
     font-family: var(--font-body);
 }
 
-.block-content-rich:focus,
-.block-content-rich:not(:empty):not(:focus):hover {
+.block-content-rich:focus {
     max-height: 1000px;
     /* Expand to full content */
     white-space: pre-wrap;
