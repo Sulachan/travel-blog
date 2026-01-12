@@ -200,6 +200,29 @@ textarea:focus {
     cursor: grabbing;
 }
 
+.fold-btn {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 0.2rem;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s ease;
+}
+
+.editor-block-item.is-folded .block-content-rich {
+    min-height: unset;
+    height: 1.6em;
+    padding: 0 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: block;
+    /* Override flex if needed */
+}
+
 .editor-block-item.dragging {
     opacity: 0.5;
     border: 1px dashed var(--accent-color);
