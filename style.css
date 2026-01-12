@@ -185,6 +185,27 @@ textarea:focus {
     cursor: pointer;
 }
 
+.drag-handle {
+    cursor: grab;
+    color: #555;
+    font-size: 1.2rem;
+    padding: 0 0.5rem;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.editor-block-item.dragging {
+    opacity: 0.5;
+    border: 1px dashed var(--accent-color);
+    background: #1a1a1a;
+}
+
 /* Trip Content Styles */
 .back-home-btn {
     position: fixed;

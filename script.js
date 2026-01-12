@@ -486,9 +486,38 @@ function renderEditorBlocks(blocks) {
     });
 }
 
+let draggedElement = null;
+
+function handleDragStart(e) {
+    draggedElement = e.currentTarget;
+    e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.classList.add('dragging');
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const target = e.currentTarget;
+    if (target && target !== draggedElement) {
+        const rect = target.getBoundingClientRect();
+        const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+        editorBlocks.insertBefore(draggedElement, next ? target.nextSibling : target);
+    }
+}
+
+function handleDragEnd(e) {
+    e.currentTarget.classList.remove('dragging');
+    draggedElement = null;
+}
+
 function createBlockElement(type, content = '') {
     const div = document.createElement('div');
     div.className = 'editor-block-item';
+    div.draggable = true;
+
+    div.addEventListener('dragstart', handleDragStart);
+    div.addEventListener('dragover', handleDragOver);
+    div.addEventListener('dragend', handleDragEnd);
 
     let inputHtml = '';
     if (type === 'text') {
@@ -522,9 +551,10 @@ function createBlockElement(type, content = '') {
     }
 
     div.innerHTML = `
+        <div class="drag-handle" title="Drag to reorder">⋮⋮</div>
         <span class="block-type">${type.toUpperCase()}</span>
         ${inputHtml}
-        <button type="button" class="remove-block">&times;</button>
+        <button type="button" class="remove-block" title="Remove block">&times;</button>
     `;
 
     if (type === 'image') {
