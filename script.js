@@ -136,7 +136,9 @@ async function saveData(newData) {
     }
 
     try {
-        await setDoc(doc(db, "content", "main"), newData);
+        // Clean data before sending to Firebase
+        const cleanedData = cleanDataForFirebase(newData);
+        await setDoc(doc(db, "content", "main"), cleanedData);
         console.log("Cloud Saved");
     } catch (e) {
         console.error("Save failed:", e);
@@ -145,6 +147,29 @@ async function saveData(newData) {
         console.error("Data being saved:", JSON.stringify(newData, null, 2));
         alert("Sync Failed: Your changes are saved locally, but not to the cloud.\nError: " + e.message + "\nCheck console for details.");
     }
+}
+
+// Clean data to remove invalid values for Firebase
+function cleanDataForFirebase(data) {
+    if (data === null || data === undefined) return null;
+
+    if (Array.isArray(data)) {
+        return data.map(item => cleanDataForFirebase(item)).filter(item => item !== null && item !== undefined);
+    }
+
+    if (typeof data === 'object') {
+        const cleaned = {};
+        for (const [key, value] of Object.entries(data)) {
+            const cleanedValue = cleanDataForFirebase(value);
+            // Only include non-null, non-undefined, non-empty string values
+            if (cleanedValue !== null && cleanedValue !== undefined && cleanedValue !== '') {
+                cleaned[key] = cleanedValue;
+            }
+        }
+        return cleaned;
+    }
+
+    return data;
 }
 
 // --- Router & Renderer ---
