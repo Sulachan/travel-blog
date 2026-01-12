@@ -390,9 +390,24 @@ function renderTrip(item, type = 'trip') {
             
             <section class="trip-content">
                 <div class="trip-blocks">
-                    ${item.blocks.map(block => {
+                    ${item.blocks.map((block, blockIdx) => {
         if (block.type === 'text') return `<div class="trip-text-block">${block.content}</div>`;
-        if (block.type === 'image') return `<div class="trip-image-block"><img src="${block.content}" alt="Trip Image"></div>`;
+        if (block.type === 'image') {
+            const images = Array.isArray(block.content) ? block.content : [block.content];
+            if (images.length === 1) {
+                return `<div class="trip-image-block"><img src="${images[0]}" alt="Trip Image" onclick="openLightbox(${blockIdx}, 0)" style="cursor:pointer;"></div>`;
+            } else {
+                return `
+                    <div class="trip-image-gallery">
+                        ${images.map((url, imgIdx) => `
+                            <div class="gallery-item" onclick="openLightbox(${blockIdx}, ${imgIdx})">
+                                <img src="${url}" alt="Gallery Image ${imgIdx + 1}">
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        }
         return '';
     }).join('')}
                 </div>
@@ -543,10 +558,20 @@ function createBlockElement(type, content = '') {
                 <div class="block-content-rich" contenteditable="true">${content}</div>
             </div>`;
     } else {
+        // Image block - support multiple images
+        const images = Array.isArray(content) ? content : (content ? [content] : ['']);
         inputHtml = `
-            <div style="flex:1; display:flex; gap:10px;">
-                <input type="text" class="block-content" value="${content}" placeholder="Image URL">
-                <button type="button" class="browse-btn" style="padding:0.2rem 0.5rem;">Browse</button>
+            <div style="flex:1;" class="image-block-container">
+                <div class="image-list">
+                    ${images.map((url, idx) => `
+                        <div class="image-item" style="display:flex; gap:10px; margin-bottom:5px;">
+                            <input type="text" class="block-content-image" value="${url}" placeholder="Image URL ${idx + 1}">
+                            <button type="button" class="browse-btn" style="padding:0.2rem 0.5rem;">Browse</button>
+                            ${images.length > 1 ? '<button type="button" class="remove-image-btn" style="padding:0.2rem 0.5rem; background:#c0392b; color:#fff;">&times;</button>' : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                <button type="button" class="add-image-btn" style="margin-top:5px; padding:0.3rem 0.7rem; background:var(--accent-color); color:#000; border:none; cursor:pointer; border-radius:4px;">+ Add Image</button>
             </div>`;
     }
 
@@ -560,12 +585,73 @@ function createBlockElement(type, content = '') {
 
 
     if (type === 'image') {
-        const input = div.querySelector('input.block-content');
-        div.querySelector('.browse-btn').onclick = () => triggerBrowse(input);
+        // Setup browse buttons for each image input
+        div.querySelectorAll('.browse-btn').forEach((btn, idx) => {
+            const input = div.querySelectorAll('.block-content-image')[idx];
+            btn.onclick = () => triggerBrowse(input);
+        });
+
+        // Setup "Add Image" button
+        const addBtn = div.querySelector('.add-image-btn');
+        addBtn.onclick = () => {
+            const imageList = div.querySelector('.image-list');
+            const newIdx = imageList.querySelectorAll('.image-item').length;
+            const newItem = document.createElement('div');
+            newItem.className = 'image-item';
+            newItem.style.cssText = 'display:flex; gap:10px; margin-bottom:5px;';
+            newItem.innerHTML = `
+                <input type="text" class="block-content-image" value="" placeholder="Image URL ${newIdx + 1}">
+                <button type="button" class="browse-btn" style="padding:0.2rem 0.5rem;">Browse</button>
+                <button type="button" class="remove-image-btn" style="padding:0.2rem 0.5rem; background:#c0392b; color:#fff;">&times;</button>
+            `;
+            imageList.appendChild(newItem);
+
+            // Setup handlers for new item
+            const newInput = newItem.querySelector('.block-content-image');
+            const newBrowseBtn = newItem.querySelector('.browse-btn');
+            const newRemoveBtn = newItem.querySelector('.remove-image-btn');
+
+            newBrowseBtn.onclick = () => triggerBrowse(newInput);
+            newRemoveBtn.onclick = () => {
+                newItem.remove();
+                // Update remove buttons visibility
+                updateRemoveButtons(div);
+            };
+        };
+
+        // Setup remove buttons
+        div.querySelectorAll('.remove-image-btn').forEach(btn => {
+            btn.onclick = () => {
+                btn.closest('.image-item').remove();
+                updateRemoveButtons(div);
+            };
+        });
     }
 
     div.querySelector('.remove-block').onclick = () => div.remove();
     editorBlocks.appendChild(div);
+}
+
+// Helper function to show/hide remove buttons based on image count
+function updateRemoveButtons(blockDiv) {
+    const imageItems = blockDiv.querySelectorAll('.image-item');
+    imageItems.forEach(item => {
+        const removeBtn = item.querySelector('.remove-image-btn');
+        if (imageItems.length === 1) {
+            if (removeBtn) removeBtn.remove();
+        } else if (!removeBtn) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'remove-image-btn';
+            btn.style.cssText = 'padding:0.2rem 0.5rem; background:#c0392b; color:#fff;';
+            btn.innerHTML = '&times;';
+            btn.onclick = () => {
+                item.remove();
+                updateRemoveButtons(blockDiv);
+            };
+            item.appendChild(btn);
+        }
+    });
 }
 
 function addBlock(type) {
@@ -588,7 +674,10 @@ tripForm.onsubmit = (e) => {
         if (type === 'text') {
             content = item.querySelector('.block-content-rich').innerHTML;
         } else {
-            content = item.querySelector('.block-content').value;
+            // Collect all image URLs from the image block
+            const imageInputs = item.querySelectorAll('.block-content-image');
+            const images = Array.from(imageInputs).map(input => input.value).filter(url => url.trim());
+            content = images.length > 0 ? images : [''];
         }
         blocks.push({ type, content });
     });
@@ -662,5 +751,101 @@ dynamicNavLinks.addEventListener('click', (e) => {
         if (mainNav) mainNav.classList.remove('active');
         if (menuToggle) menuToggle.classList.remove('active');
         window.scrollTo(0, 0);
+    }
+});
+
+// Lightbox functionality
+let currentLightboxImages = [];
+let currentLightboxIndex = 0;
+
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightbox-img');
+const lightboxClose = document.querySelector('.lightbox-close');
+const lightboxPrev = document.querySelector('.lightbox-prev');
+const lightboxNext = document.querySelector('.lightbox-next');
+
+window.openLightbox = function(blockIdx, imgIdx) {
+    // Get the current trip/recipe data
+    const hash = window.location.hash;
+    let item = null;
+    
+    if (hash.startsWith('#trip/')) {
+        const id = hash.substring(6);
+        item = appData.trips?.[id];
+    } else if (hash.startsWith('#recipe/')) {
+        const id = hash.substring(8);
+        item = appData.recipes?.[id];
+    }
+    
+    if (!item || !item.blocks[blockIdx]) return;
+    
+    const block = item.blocks[blockIdx];
+    currentLightboxImages = Array.isArray(block.content) ? block.content : [block.content];
+    currentLightboxIndex = imgIdx;
+    
+    showLightboxImage();
+    lightbox.classList.add('active');
+};
+
+function showLightboxImage() {
+    lightboxImg.src = currentLightboxImages[currentLightboxIndex];
+    
+    // Show/hide navigation buttons
+    if (currentLightboxIndex === 0) {
+        lightboxPrev.classList.add('hidden');
+    } else {
+        lightboxPrev.classList.remove('hidden');
+    }
+    
+    if (currentLightboxIndex === currentLightboxImages.length - 1) {
+        lightboxNext.classList.add('hidden');
+    } else {
+        lightboxNext.classList.remove('hidden');
+    }
+}
+
+function closeLightbox() {
+    lightbox.classList.remove('active');
+    currentLightboxImages = [];
+    currentLightboxIndex = 0;
+}
+
+// Event listeners
+lightboxClose.onclick = closeLightbox;
+
+lightbox.onclick = (e) => {
+    if (e.target === lightbox) {
+        closeLightbox();
+    }
+};
+
+lightboxPrev.onclick = (e) => {
+    e.stopPropagation();
+    if (currentLightboxIndex > 0) {
+        currentLightboxIndex--;
+        showLightboxImage();
+    }
+};
+
+lightboxNext.onclick = (e) => {
+    e.stopPropagation();
+    if (currentLightboxIndex < currentLightboxImages.length - 1) {
+        currentLightboxIndex++;
+        showLightboxImage();
+    }
+};
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('active')) return;
+    
+    if (e.key === 'Escape') {
+        closeLightbox();
+    } else if (e.key === 'ArrowLeft' && currentLightboxIndex > 0) {
+        currentLightboxIndex--;
+        showLightboxImage();
+    } else if (e.key === 'ArrowRight' && currentLightboxIndex < currentLightboxImages.length - 1) {
+        currentLightboxIndex++;
+        showLightboxImage();
     }
 });
