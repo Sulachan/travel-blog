@@ -552,10 +552,19 @@ function createBlockElement(type, content = '') {
 
     div.innerHTML = `
         <div class="drag-handle" title="Drag to reorder">⋮⋮</div>
+        ${type === 'text' ? '<button type="button" class="fold-btn" title="Toggle Fold">▼</button>' : ''}
         <span class="block-type">${type.toUpperCase()}</span>
         ${inputHtml}
         <button type="button" class="remove-block" title="Remove block">&times;</button>
     `;
+
+    if (type === 'text') {
+        const foldBtn = div.querySelector('.fold-btn');
+        foldBtn.onclick = () => {
+            div.classList.toggle('is-folded');
+            foldBtn.innerText = div.classList.contains('is-folded') ? '▶' : '▼';
+        };
+    }
 
     if (type === 'image') {
         const input = div.querySelector('input.block-content');
