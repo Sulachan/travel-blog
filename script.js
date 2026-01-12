@@ -683,7 +683,9 @@ tripForm.onsubmit = (e) => {
             // Collect all image URLs from the image block
             const imageInputs = item.querySelectorAll('.block-content-image');
             const images = Array.from(imageInputs).map(input => input.value).filter(url => url.trim());
-            content = images.length > 0 ? images : [''];
+            // Don't save blocks with no images
+            if (images.length === 0) return;
+            content = images;
         }
         blocks.push({ type, content });
     });

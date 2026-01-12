@@ -740,7 +740,7 @@ textarea:focus {
 
 .trip-image-gallery .gallery-item:hover {
     transform: scale(1.02);
-    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px var(--accent-color);
 }
 
 /* Lightbox */
